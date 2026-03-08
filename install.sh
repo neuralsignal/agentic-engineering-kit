@@ -210,6 +210,19 @@ setup_platform() {
     done
 
     echo "  .$name/ setup complete."
+
+    # Cross-client .agents/ convention (agentskills.io standard)
+    local agents_dir="$target_dir/.agents"
+    if [[ ! -d "$agents_dir" || -L "$agents_dir/skills" || ! -e "$agents_dir/skills" ]]; then
+        echo "Setting up .agents/ cross-client structure in $target_dir ..."
+        if [[ "$dry_run" != "true" ]]; then
+            mkdir -p "$agents_dir"
+        fi
+        for subdir in rules skills; do
+            create_symlink "$agents_dir/$subdir" "$target_dir/$subdir" "$dry_run"
+        done
+        echo "  .agents/ setup complete."
+    fi
 }
 
 # --- Main ---
@@ -297,10 +310,12 @@ main() {
     fi
 
     # Platform setup
-    for p in "${platforms[@]}"; do
-        setup_platform "$p" "$target_dir" "$dry_run"
-        echo ""
-    done
+    if [[ ${#platforms[@]} -gt 0 ]]; then
+        for p in "${platforms[@]}"; do
+            setup_platform "$p" "$target_dir" "$dry_run"
+            echo ""
+        done
+    fi
 
     # If nothing was requested, show help
     if [[ ${#components[@]} -eq 0 && ${#platforms[@]} -eq 0 ]]; then

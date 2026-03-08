@@ -19,6 +19,7 @@ These are steering constraints: rules that require judgment to uphold. Toolchain
 Violating any of these is a bug. Stop and fix before proceeding.
 
 - **KISS** -- One tool per job. No fallback chains. If a library exists, use it. No clever abstractions, no premature generalization. Do not add abstraction until duplication or change pressure clearly demands it.
+- **YAGNI** -- Do not add capabilities, config keys, feature flags, abstractions, or code paths without a concrete, current use case. Speculative "future-proof" code is a maintenance liability, not an asset. If nothing calls it today, it does not exist today.
 - **DRY / One Source of Truth** -- Shared logic lives in shared modules. Schemas, policies, contracts, and reusable transformations are defined once. Copy-paste is a defect. If two places must stay in sync, redesign until one place becomes authoritative.
 - **No Default Arguments** -- Zero default values in function signatures, constructors, or CLI args. Every value comes from config or the caller. If a caller does not provide it, the code crashes -- that is correct behavior. A default is a hidden assumption waiting to rot. Declarative metadata may define defaults when the format requires them; executable runtime behavior may not.
 - **Fail Fast and Loud** -- No silent swallowing. No catch-and-ignore. Errors propagate with full context. Missing config = crash with a clear message. Bad response = log what went wrong and stop. Domain rules may intentionally exclude data; engineering failures must never masquerade as success.
@@ -32,6 +33,7 @@ Violating any of these is a bug. Stop and fix before proceeding.
 - **Modularity** -- Each module is standalone with a single responsibility. A module is well-designed when a reader can understand it without needing to read everything else. Enable, disable, and schedule independently. No god objects, no shared mutable state. New capabilities should be added as new modules or clearly bounded extensions, not by accreting special cases. Files exceeding ~300 lines are a smell; consider splitting.
 - **Composition Over Inheritance** -- Prefer composing behavior from smaller parts rather than deep inheritance hierarchies.
 - **Explicit Interfaces** -- Define clear contracts between modules. Do not rely on implicit state or side effects.
+- **Inward Dependency Direction** -- Concrete implementations depend on shared contracts, interfaces, and config -- not on other concrete implementations. Avoid cross-subsystem coupling where one integration imports internals from another.
 - **Flat Hierarchies** -- Avoid nesting containers inside containers. Flatten where possible. Deep nesting signals unclear abstraction boundaries.
 - **Thin Wrappers** -- Scripts (CLI entry points) are thin wrappers: arg parsing, validation, exit codes. Business logic lives in library modules. Scripts import from modules; they never duplicate logic.
 - **Descriptive Names** -- Package directories, modules, and public symbols must have project-specific, self-documenting names. Never use `src`, `lib`, `utils`, or `core` as importable package names.
@@ -138,6 +140,7 @@ Violating any of these is a bug. Stop and fix before proceeding.
 - **Clean breaks with documentation** -- Clean breaks are allowed, but schema, config, API, and state changes still require explicit documentation of: consumer impact, rollout order, migration or backfill notes, and abort expectations.
 - **Minimal diff** -- Change only what is necessary. Do not refactor adjacent code or "improve" code outside the task scope.
 - **One concern per change** -- A single commit addresses one logical concern. Do not bundle unrelated fixes.
+- **Reversibility** -- Keep changes easy to revert. For risky changes (schema migrations, infrastructure, security boundaries), define the rollback path before merging. Small, scoped commits with clear blast radius are easier to reverse than mixed mega-patches.
 - **Stop before scope creep** -- Stop and ask before turning a fix into a refactor, migration, or architecture cleanup.
 - **Follow established architecture** -- Follow the repo's established architecture unless there is a clear reason to improve it. Prefer reproducible pipelines and generated artifacts over one-off manual edits.
 
@@ -187,6 +190,7 @@ Before taking any of these actions, describe the impact and wait for confirmatio
 - Review for correctness, regression risk, security, data safety, and test adequacy before style.
 - Report findings in severity order.
 - Favor high-confidence, actionable findings over exhaustive but noisy commentary.
+- Classify changes by risk tier and match review depth accordingly. Docs-only and test-only changes warrant lighter review. Changes to security boundaries, access control, external integrations, and infrastructure warrant deeper scrutiny. When uncertain about the risk tier, classify higher.
 - A clean review is not proof of safety; verification is defense in depth, not a guarantee.
 
 ---
@@ -301,6 +305,16 @@ At the start of any task, check your environment:
 - Ensure your tests pass in isolation before declaring done.
 - Do not assume the state of other concurrent branches. Your changes must apply cleanly to the base branch.
 - Do not rebase or force-push worktree branches while other agents may be referencing them.
+
+### Handoff protocol
+
+When handing off work to another agent, human, or future session, include:
+
+1. What changed (files, behavior, config)
+2. What did not change (explicitly note preserved behavior)
+3. What was verified and how (commands run, tests passed)
+4. Remaining risks, unknowns, or unresolved issues
+5. Recommended next action
 
 ---
 

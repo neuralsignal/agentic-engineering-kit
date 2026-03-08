@@ -24,3 +24,154 @@ components:
     platforms: [generic]
     dependencies: []
     install_target: "."
+
+  - id: github-actions-claude
+    type: skill
+    path: skills/github-actions-claude
+    name: GitHub Actions + Claude
+    description: >
+      Pattern catalog for authoring, debugging, and testing GitHub Actions
+      workflows that use anthropics/claude-code-action. Covers permissions,
+      tool allowlists, model selection, output patterns, and failure modes.
+    category: ci-cd
+    platforms: [generic]
+    dependencies: []
+    install_target: skills
+
+  - id: skill-creator
+    type: skill
+    path: skills/skill-creator
+    name: Skill Creator
+    description: >
+      Create new skills, iteratively improve existing skills, and measure
+      skill performance with eval benchmarks and description optimization.
+      Includes grader, comparator, and analyzer subagents, an eval viewer
+      webapp, and automated description triggering tests.
+    category: meta
+    platforms: [generic]
+    dependencies: []
+    install_target: skills
+    license: Apache-2.0
+    upstream: https://github.com/anthropics/skills/tree/main/skills/skill-creator
+
+  # --- Rules ---
+
+  - id: engineering-principles
+    type: rule
+    path: rules/engineering-principles.md
+    name: Engineering Principles
+    description: >
+      Non-negotiable engineering principles: KISS, DRY, no default arguments,
+      fail fast, config-driven, modular, TDD, property-based testing.
+    category: core
+    platforms: [generic]
+    dependencies: [constitution]
+    install_target: rules
+
+  - id: planning-protocol
+    type: rule
+    path: rules/planning-protocol.md
+    name: Planning Protocol
+    description: >
+      Task complexity assessment, structured question-asking, scope validation,
+      re-planning triggers, and planning anti-patterns.
+    category: planning
+    platforms: [generic]
+    dependencies: [constitution]
+    install_target: rules
+
+  - id: data-ml-principles
+    type: rule
+    path: rules/data-ml-principles.md
+    name: Data and ML Principles
+    description: >
+      Notebooks vs source, experiment provenance, feature hygiene, schema safety,
+      data pipeline testing, and model monitoring in production.
+    category: data-ml
+    platforms: [generic]
+    dependencies: [constitution]
+    install_target: rules
+
+  - id: git-commit-conventions
+    type: rule
+    path: rules/git-commit-conventions.md
+    name: Git Commit Conventions
+    description: >
+      Commit message format (type-prefix + imperative), staging rules,
+      branch naming conventions.
+    category: git
+    platforms: [generic]
+    dependencies: []
+    install_target: rules
+
+  - id: workspace-portability
+    type: rule
+    path: rules/workspace-portability.md
+    name: Workspace Portability
+    description: >
+      No hardcoded paths, config-derived workspace roots, relative path
+      resolution against config file directory.
+    category: core
+    platforms: [generic]
+    dependencies: []
+    install_target: rules
+
+  - id: no-implicit-assumptions
+    type: rule
+    path: rules/no-implicit-assumptions.md
+    name: No Implicit Assumptions
+    description: >
+      Never attribute responsibilities or decisions to specific people
+      unless explicitly confirmed. Use role-based language by default.
+    category: agentic
+    platforms: [generic]
+    dependencies: []
+    install_target: rules
+
+  - id: source-citations
+    type: rule
+    path: rules/source-citations.md
+    name: Source Citations
+    description: >
+      Citation conventions for external claims in knowledge docs: inline
+      links, Sources sections, internal cross-references.
+    category: documentation
+    platforms: [generic]
+    dependencies: []
+    install_target: rules
+
+  - id: memory-trace-protocol
+    type: rule
+    path: rules/memory-trace-protocol.md
+    name: Memory Trace Protocol
+    description: >
+      Append-only session memory traces to memory.md for cross-session
+      continuity. When to write, format, and integration with task lifecycle.
+    category: agentic
+    platforms: [generic]
+    dependencies: []
+    install_target: rules
+
+  - id: git-submodules
+    type: rule
+    path: rules/git-submodules.md
+    name: Git Submodules
+    description: >
+      Decision framework for when to use submodules vs package deps,
+      directory conventions, add/update/remove commands, common pitfalls.
+    category: git
+    platforms: [generic]
+    dependencies: []
+    install_target: rules
+
+  - id: mermaid-obsidian
+    type: rule
+    path: rules/mermaid-obsidian.md
+    name: Mermaid Obsidian Conventions
+    description: >
+      Mermaid diagram conventions for Obsidian compatibility: line breaks,
+      subgraph labels, node IDs, arrow labels.
+    category: documentation
+    platforms: [generic]
+    dependencies: []
+    install_target: rules

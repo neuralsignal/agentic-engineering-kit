@@ -1,0 +1,60 @@
+{
+  "skill_name": "github-actions-claude",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a GitHub Actions workflow that uses Claude to review pull requests and post a comment with the review. The workflow should trigger on PR open and synchronize events.",
+      "expected_output": "A complete GitHub Actions YAML workflow file using anthropics/claude-code-action@v1 with appropriate permissions, model selection via claude_args, and a step that posts the review as a PR comment.",
+      "files": [],
+      "assertions": [
+        "The workflow uses anthropics/claude-code-action@v1",
+        "The permissions block includes id-token: write",
+        "The permissions block includes pull-requests: write for posting comments",
+        "Tool configuration uses claude_args with --allowedTools (not the deprecated allowed_tools input)",
+        "Model and max-turns are set via claude_args (not deprecated top-level model/max_turns inputs)",
+        "The workflow triggers on pull_request events with opened and synchronize types",
+        "The prompt instructs Claude to write output to a file rather than inline"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I'm getting a 403 Forbidden error when my Claude-powered GitHub Actions workflow tries to post a comment on a pull request. Here's my workflow:\n\n```yaml\nname: PR Review\non:\n  pull_request:\n    types: [opened]\npermissions:\n  contents: read\n  id-token: write\njobs:\n  review:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: anthropics/claude-code-action@v1\n        with:\n          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}\n          claude_args: |\n            --allowedTools Read,Write,Glob,Grep,Bash\n          prompt: \"Review this PR and post a comment.\"\n```\n\nWhat's wrong?",
+      "expected_output": "Identifies that the permissions block is missing pull-requests: write, which is required for posting PR comments. Provides the corrected permissions block.",
+      "files": [],
+      "assertions": [
+        "The response identifies the missing pull-requests: write permission as the cause",
+        "The response provides a corrected permissions block",
+        "The response explains that id-token: write alone is not sufficient for PR interactions",
+        "The fix is actionable and includes the exact YAML to add"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Audit this GitHub Actions workflow for least-privilege permissions and suggest improvements:\n\n```yaml\nname: Issue Triage\non:\n  issues:\n    types: [opened]\npermissions:\n  contents: write\n  pull-requests: write\n  issues: write\n  id-token: write\n  actions: write\njobs:\n  triage:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: anthropics/claude-code-action@v1\n        with:\n          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}\n          claude_args: |\n            --model claude-sonnet-4-6\n            --max-turns 30\n            --allowedTools Read,Write,Edit,Glob,Grep,Bash\n          prompt: \"Classify this issue and add appropriate labels.\"\n```",
+      "expected_output": "Identifies multiple over-provisioned permissions and configuration issues. Recommends removing unnecessary permissions, reducing max-turns, using a lighter model, and tightening the tool allowlist.",
+      "files": [],
+      "assertions": [
+        "Identifies that contents: write is unnecessary for issue triage (should be read)",
+        "Identifies that pull-requests: write is unnecessary for issue triage",
+        "Identifies that actions: write is unnecessary and excessive",
+        "Suggests reducing --max-turns (30 is excessive for triage, 5 is sufficient)",
+        "Suggests using claude-haiku for triage instead of claude-sonnet",
+        "Suggests reducing --allowedTools (Write and Edit are unnecessary for labeling)",
+        "Does not reference any deprecated v0.x inputs (allowed_tools, model, max_turns, dangerously_skip_permissions)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I want to add a sequential thinking MCP server to my Claude-powered GitHub Actions workflow so Claude can reason step-by-step before making changes. How do I configure this?",
+      "expected_output": "Provides a workflow configuration using claude_args with --mcp-config to add the sequential thinking MCP server, and --allowedTools to grant access to the MCP tool.",
+      "files": [],
+      "assertions": [
+        "The response includes --mcp-config in claude_args",
+        "The MCP config JSON references @modelcontextprotocol/server-sequential-thinking",
+        "The response includes --allowedTools with the MCP tool name (mcp__sequential-thinking__sequentialthinking)",
+        "The MCP server is launched via npx",
+        "The configuration is shown as a complete working step in a workflow YAML"
+      ]
+    }
+  ]
+}

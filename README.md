@@ -57,13 +57,25 @@ See [docs/composition-guide.md](docs/composition-guide.md) for detailed instruct
 
 | ID | Type | Description |
 |----|------|-------------|
-| `constitution` | constitution | 19-section engineering constitution: supreme principles, architecture, error handling, testing, agentic engineering, planning and discovery, security, git discipline, data/ML pipelines, language-specific rules (Python, TypeScript), and a full task lifecycle. |
+| `constitution` | constitution | 20-section engineering constitution: supreme principles, architecture, error handling, testing, agentic engineering, planning and discovery, security, git discipline, data/ML pipelines, multi-agent coordination, language-specific rules (Python, TypeScript), and a full task lifecycle. |
+| `engineering-principles` | rule | Non-negotiable engineering principles: KISS, DRY, no defaults, fail fast, config-driven, TDD, property testing. |
+| `planning-protocol` | rule | Task assessment, structured questions, scope validation, re-planning triggers, anti-patterns. |
+| `data-ml-principles` | rule | Notebooks vs source, experiment provenance, feature hygiene, pipeline testing, model monitoring. |
+| `git-commit-conventions` | rule | Commit format, staging rules, branch naming. |
+| `workspace-portability` | rule | No hardcoded paths, config-derived roots, relative path resolution. |
+| `no-implicit-assumptions` | rule | Never attribute ownership without explicit user confirmation. |
+| `source-citations` | rule | Citation conventions for external claims in knowledge docs. |
+| `memory-trace-protocol` | rule | Append-only session memory traces for cross-session continuity. |
+| `git-submodules` | rule | Decision framework and commands for git submodules. |
+| `mermaid-obsidian` | rule | Mermaid diagram conventions for Obsidian compatibility. |
+| `github-actions-claude` | skill | Pattern catalog for GitHub Actions workflows using `anthropics/claude-code-action`. |
+| `skill-creator` | skill | Create, improve, and benchmark agent skills with eval runner and review webapp. *(Apache 2.0, from [anthropics/skills](https://github.com/anthropics/skills))* |
 
-Components are listed in [catalog.yaml](catalog.yaml). Future releases will add rules, skills, and agents.
+Components are listed in [catalog.yaml](catalog.yaml). Rules are auto-loaded agent guidance; skills are on-demand workflows following the [Agent Skills specification](https://agentskills.io/specification).
 
 ## Platform Support
 
-This kit is platform-agnostic. Components are plain markdown files that work with any AI coding assistant. Most platforms auto-load rules and skills from a `.<platform-name>/` directory. The install script creates symlinks from `.<name>/` to the canonical `rules/`, `skills/`, and `agents/` directories:
+This kit is platform-agnostic. Components are plain markdown files that work with any AI coding assistant. Skills follow the [Agent Skills specification](https://agentskills.io/specification) and are discoverable via the `.agents/skills/` cross-client convention. The install script also creates platform-specific symlinks from `.<name>/` to the canonical `rules/`, `skills/`, and `agents/` directories:
 
 ```bash
 # Example: set up for Cursor and Claude Code
@@ -115,3 +127,5 @@ curl -O https://raw.githubusercontent.com/neuralsignal/agentic-engineering-kit/v
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+**Third-party components:** The `skills/skill-creator/` directory is derived from [anthropics/skills](https://github.com/anthropics/skills) and is licensed under the Apache License 2.0. See [skills/skill-creator/LICENSE.txt](skills/skill-creator/LICENSE.txt) for the full text.

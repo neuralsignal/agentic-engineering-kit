@@ -81,6 +81,39 @@ paths:
 
 Each platform ignores fields it does not recognize. Use the same glob patterns in both `globs` and `paths`.
 
+## Cross-Client Convention: `.agents/`
+
+The [Agent Skills specification](https://agentskills.io/specification) defines `.agents/skills/` as a cross-client directory for skill discovery. Any compliant agent scans this path automatically, regardless of platform.
+
+The install script creates `.agents/` symlinks alongside platform-specific ones whenever `--setup-platform` is used:
+
+```
+my-project/
+├── skills/                              <- canonical
+├── rules/                               <- canonical
+├── .agents/
+│   ├── skills/  --symlink-->  skills/   (cross-client standard)
+│   └── rules/   --symlink-->  rules/
+├── .cursor/
+│   ├── skills/  --symlink-->  skills/   (platform-specific)
+│   ├── rules/   --symlink-->  rules/
+│   └── agents/  --symlink-->  agents/
+└── .claude/
+    ├── skills/  --symlink-->  skills/
+    ├── rules/   --symlink-->  rules/
+    └── agents/  --symlink-->  agents/
+```
+
+To set up `.agents/` manually:
+
+```bash
+mkdir -p .agents
+ln -s ../skills .agents/skills
+ln -s ../rules .agents/rules
+```
+
+Clients known to scan `.agents/skills/`: Claude Code, Cursor, Gemini CLI, VS Code Copilot, OpenHands, Goose, and others. See [agentskills.io](https://agentskills.io/home) for the full list of compatible clients.
+
 ## Generic / Other Platforms
 
 For platforms without native rule/skill/agent support, the kit's markdown files serve as reference documentation. Copy `CONSTITUTION.md` into your project root and point your AI assistant at it.
