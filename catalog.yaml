@@ -1,0 +1,26 @@
+schema_version: "1"
+
+# Each component has:
+#   id:             Unique identifier used by install.sh
+#   type:           constitution | rule | skill | agent
+#   path:           Path relative to repo root
+#   name:           Human-readable name
+#   description:    What this component provides
+#   category:       Logical grouping (core, planning, testing, data-ml, security, etc.)
+#   platforms:      Which agent platforms this works with
+#   dependencies:   Other component IDs this requires
+#   install_target: Where to copy relative to the target project root ("." = project root)
+
+components:
+  - id: constitution
+    type: constitution
+    path: CONSTITUTION.md
+    name: Engineering Constitution
+    description: >
+      19-section engineering constitution covering supreme principles,
+      architecture, error handling, testing, agentic engineering, planning,
+      security, git discipline, data/ML pipelines, and language-specific rules.
+    category: core
+    platforms: [generic]
+    dependencies: []
+    install_target: "."

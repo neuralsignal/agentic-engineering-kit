@@ -1,0 +1,20 @@
+# Platform-specific agent directories (created by install.sh, not tracked)
+.cursor/
+.claude/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pixi/
+
+# Node
+node_modules/
