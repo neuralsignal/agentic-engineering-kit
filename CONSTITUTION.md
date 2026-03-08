@@ -178,6 +178,7 @@ Before taking any of these actions, describe the impact and wait for confirmatio
 - **Never commit:** secrets (`.env`), generated environments, runtime output, machine-specific config.
 - **Always commit:** lock files (deterministic builds), source code, config templates.
 - **Branch naming:** `kebab-case-description`. Delete after merge.
+- **Worktree awareness** -- If running in a git worktree, stay on the assigned branch. Do not push directly from worktrees. Do not run destructive git operations (reset, clean, gc) that affect the shared object store.
 
 ---
 
@@ -258,6 +259,48 @@ A task is complete when ALL of the following are true. If any step cannot be ver
 - **Training-serving parity** -- The code and data that train a model must match what serves it. Re-use code between training and serving pipelines. Measure and monitor skew.
 - **Reproducibility** -- Pipelines run end-to-end from raw data to final output with a single command. Version data schemas. Pin random seeds. Log experiment parameters and results as artifacts.
 - **Watch for silent ML failures** -- ML systems mask errors by producing reasonable-looking outputs from corrupted or stale data. Monitor for data staleness, feature drift, and coverage changes. A model that silently degrades is worse than one that crashes.
+
+---
+
+## 20. Multi-Agent Coordination
+
+These rules apply whenever agents may be working concurrently on the same repository, or when a single task benefits from isolation. The agent determines the appropriate working mode during the planning phase.
+
+### Assess your working mode
+
+During planning (Task Lifecycle step 1-3), determine how you will work:
+
+- **Direct mode** -- You are the only agent, the task is small, and there is no risk of conflicts. Work directly on the current branch in the primary working tree.
+- **Isolated mode** -- Multiple agents are active, the task is large or risky, or the user requests isolation. Create or use a git worktree on a dedicated branch. This prevents file conflicts and lets the user review before merging.
+
+If unsure, ask the user: "Should I work directly on the current branch, or create an isolated worktree for this task?"
+
+To create a worktree manually (any platform):
+```
+git worktree add -b <branch-name> <path> <base-branch>
+```
+
+### Context detection
+
+At the start of any task, check your environment:
+
+- **Am I in a worktree?** -- If `.git` is a file (not a directory), you are in a worktree. Note your branch name. Do not switch branches or run `git checkout` on a different branch.
+- **Are other agents running?** -- Check for other worktrees: `git worktree list`. If others exist and are active, treat shared files with extra caution.
+- **What is my scope?** -- In a parallel run, each agent has one assigned task. Do not touch files unrelated to your task. Flag issues you notice in your report instead.
+
+### Isolation rules (when in isolated mode)
+
+- **Own branch, own worktree** -- Each agent works on its own branch in its own worktree. Never modify files in another agent's worktree. All merges happen through the primary working tree, controlled by the user.
+- **Shared state is a race condition** -- Files outside version control (databases, `.env`, lock files, caches, runtime state) may be shared across worktrees. Do not write to shared state files unless your task explicitly requires it. If exclusive access to a shared resource is needed, say so and wait for confirmation.
+- **Do not push from worktrees** -- Commit to your branch, but let the user handle pushing and merging. Do not run destructive git operations (reset --hard, clean -fd, gc) that affect the shared object store.
+- **Worktree initialization** -- Every worktree must be usable after creation. If the project has an initialization script, ensure it runs. If a worktree is missing dependencies, fix the init script -- do not manually patch the worktree.
+
+### Merge discipline
+
+- Make small, self-contained commits on your branch with descriptive messages.
+- Ensure your tests pass in isolation before declaring done.
+- Do not assume the state of other concurrent branches. Your changes must apply cleanly to the base branch.
+- Do not rebase or force-push worktree branches while other agents may be referencing them.
 
 ---
 
