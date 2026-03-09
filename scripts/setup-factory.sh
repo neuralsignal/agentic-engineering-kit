@@ -59,13 +59,11 @@ DASHBOARD=$(gh issue list --repo "$REPO" \
 if [ -n "$DASHBOARD" ]; then
   echo "  Factory Dashboard already exists: issue #$DASHBOARD"
 else
-  DASHBOARD=$(gh issue create \
+  DASHBOARD_URL=$(gh issue create \
     --repo "$REPO" \
     --title "[Factory Dashboard]" \
-    --body "Status aggregation point for dark factory assessment agents. The factory-orchestrator workflow posts periodic status summaries as comments on this issue." \
-    --json number \
-    --jq '.number')
-  echo "  Created Factory Dashboard: issue #$DASHBOARD"
+    --body "Status aggregation point for dark factory assessment agents. The factory-orchestrator workflow posts periodic status summaries as comments on this issue.")
+  echo "  Created Factory Dashboard: $DASHBOARD_URL"
 fi
 echo ""
 
