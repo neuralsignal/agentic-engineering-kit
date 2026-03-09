@@ -78,7 +78,10 @@ Assessment agent (GITHUB_TOKEN) creates issue with claude:implement label
   → Issue sits orphaned forever
 ```
 
-**Fix**: The `factory-orchestrator` workflow uses a `FACTORY_PAT` (personal access token) to re-label orphaned issues. PAT-triggered events **do** fire downstream workflows, restoring the autonomous loop. See the Factory Orchestrator section below.
+**Fix**: Two mitigations:
+
+1. **`issue-implement` creates PRs with `FACTORY_PAT`** — the draft PR creation and branch push events fire CI and other downstream workflows. Without this, CI never runs on agent-created PRs, and the auto-fix loop is dead.
+2. **`factory-orchestrator` re-labels orphaned issues with `FACTORY_PAT`** — assessment agents create issues with `GITHUB_TOKEN`, so the `claude:implement` label event is suppressed. The orchestrator detects these orphaned issues hourly and re-applies the label using `FACTORY_PAT`, which does fire `issue-implement`.
 
 ## Prerequisites
 
@@ -88,7 +91,7 @@ Before installing the dark factory workflows, ensure:
 
 - **`CLAUDE_CODE_OAUTH_TOKEN`** — an OAuth token that grants Claude Code permission to act on your repo. Generate it by running `claude /install-github-app` locally, then store the token as a repository secret (see Installation step 4).
 
-- **`FACTORY_PAT`** — a personal access token used by the factory orchestrator to re-label issues (bypassing the GITHUB_TOKEN cascade limitation). Create a fine-grained PAT scoped to the target repo with read/write permissions for: actions, commit statuses, issues, and pull requests. Store as a repository secret named `FACTORY_PAT`. **Note**: fine-grained PATs have [known issues with label operations on public repos](https://github.com/cli/cli/issues/9166). If label operations fail, fall back to a classic PAT with `public_repo` scope.
+- **`FACTORY_PAT`** — a personal access token used by `issue-implement` (PR creation) and `factory-orchestrator` (issue re-labeling) to bypass the GITHUB_TOKEN cascade limitation. Create a fine-grained PAT scoped to the target repo with read/write permissions for: actions, commit statuses, issues, and pull requests. Store as a repository secret named `FACTORY_PAT`. **Note**: fine-grained PATs have [known issues with label operations on public repos](https://github.com/cli/cli/issues/9166). If label operations fail, fall back to a classic PAT with `public_repo` scope.
 
 - **`GITHUB_TOKEN`** — automatically provided by GitHub Actions to every workflow run. No setup needed. The workflows reference it as `${{ secrets.GITHUB_TOKEN }}`.
 
@@ -222,6 +225,12 @@ See `templates/CLAUDE-factory.md` for the full template.
 
 **"GitHub Actions is not permitted to create or approve pull requests"**
 The `issue-implement` or `pr-code-review` workflow fails with this error. Fix: go to **Settings → Actions → General → Workflow permissions** and enable **Read and write permissions** + **Allow GitHub Actions to create and approve pull requests**.
+
+**CI never runs on agent-created PRs (no checks reported)**
+The `issue-implement` workflow creates a draft PR, but CI, `pr-code-review`, and `pr-docs-check` never trigger. This is the GITHUB_TOKEN cascade limitation — PR creation events from `GITHUB_TOKEN` are suppressed. Fix: ensure `issue-implement` uses `FACTORY_PAT` (not `GITHUB_TOKEN`) in the "Create PR" step. PAT-triggered events cascade normally. The template already uses `FACTORY_PAT` for this step.
+
+**Auto-fix loop never triggers**
+`pr-autofix` triggers on `workflow_run` completion of the CI workflow. If CI never runs (see above), `pr-autofix` never fires. Verify: (1) CI ran on the PR branch, (2) the branch starts with `claude/`, (3) CI conclusion is `failure` (for fix) or `success` (for ready).
 
 **PR Code Review posts no review**
 The `pr-code-review` workflow runs but no review comment appears. This is typically the same permissions issue — the workflow needs write access to pull-requests at the repo level, not just in the YAML `permissions:` block.
