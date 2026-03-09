@@ -9,6 +9,7 @@ Skills in this kit follow the [Agent Skills specification](https://agentskills.i
 | Skill | Description |
 |-------|-------------|
 | [conda-forge-publish](conda-forge-publish/) | Publish Python packages to conda-forge — recipe authoring, staged-recipes PR submission, and feedstock maintenance |
+| [docs-site](docs-site/) | Set up MkDocs + Material documentation with auto-generated API reference for Python packages |
 | [github-actions-claude](github-actions-claude/) | Pattern catalog for authoring, debugging, and testing GitHub Actions workflows that use `anthropics/claude-code-action` |
 | [skill-creator](skill-creator/) | Create, iteratively improve, and benchmark agent skills with eval runner, description optimizer, and review webapp. (Apache 2.0, from [anthropics/skills](https://github.com/anthropics/skills)) |
 

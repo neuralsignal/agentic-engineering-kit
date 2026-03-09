@@ -52,6 +52,19 @@ components:
     dependencies: []
     install_target: skills
 
+  - id: docs-site
+    type: skill
+    path: skills/docs-site
+    name: Documentation Site
+    description: >
+      Set up MkDocs + Material documentation with auto-generated API reference
+      for Python packages. Covers mkdocs.yml configuration, mkdocstrings setup,
+      docs/ skeleton, and GitHub Pages deployment workflow.
+    category: documentation
+    platforms: [generic]
+    dependencies: [wf-docs-deploy]
+    install_target: skills
+
   - id: skill-creator
     type: skill
     path: skills/skill-creator
@@ -335,6 +348,19 @@ components:
     category: ci-cd
     platforms: [github-actions]
     dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
+  - id: wf-docs-deploy
+    type: workflow
+    path: workflows/docs-deploy.yml
+    name: Docs Deploy
+    description: >
+      Build MkDocs documentation and deploy to GitHub Pages. Builds on every
+      push and PR (catch broken docs early), deploys only on push to main.
+      Uses official actions/deploy-pages (no PAT or gh-pages branch needed).
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: []
     install_target: .github/workflows
 
   - id: wf-factory-orchestrator
