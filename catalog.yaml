@@ -38,6 +38,20 @@ components:
     dependencies: []
     install_target: skills
 
+  - id: conda-forge-publish
+    type: skill
+    path: skills/conda-forge-publish
+    name: conda-forge Publish
+    description: >
+      End-to-end workflow for publishing Python packages to conda-forge.
+      Covers rattler-build v1 recipe authoring, staged-recipes PR submission,
+      feedstock maintenance, and common gotchas (entry_points, python_min,
+      cross-platform dep availability).
+    category: packaging
+    platforms: [generic]
+    dependencies: []
+    install_target: skills
+
   - id: skill-creator
     type: skill
     path: skills/skill-creator
