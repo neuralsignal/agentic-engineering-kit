@@ -156,7 +156,7 @@ mkdocstrings auto-generates documentation from the module's docstrings, type hin
 Copy both workflows to your project's `.github/workflows/`:
 
 - **`docs-deploy.yml`** — builds on every push/PR, deploys to GitHub Pages on push to main
-- **`docs-update.yml`** — triggers on source code changes + weekly schedule, uses Claude to detect drift between code and docs, opens a PR with updates
+- **`docs-update.yml`** — runs weekly + manual dispatch, uses Claude to detect drift between code and docs, opens a PR with updates
 
 Update the path filters in both workflows to match your package directory (replace the `src/**` TODO lines).
 
@@ -190,5 +190,6 @@ pixi run docs-build
 - **Path filters**: The workflow only triggers on changes to docs/, mkdocs.yml, or source code. If you add new paths to the nav, make sure the path filter in the workflow covers them.
 - **Mermaid diagrams in docs**: The Material theme renders Mermaid diagrams natively via `pymdownx.superfences` custom fences. No additional plugins needed.
 - **Snippets for changelog**: Use `--8<-- "CHANGELOG.md"` in `docs/changelog.md` to include the root CHANGELOG.md without duplicating it.
-- **docs-update loop prevention**: The `docs-update` workflow only triggers on source code changes, NOT on `docs/**` changes. This prevents the workflow from re-triggering itself when it pushes doc updates. It also skips if an open `claude/docs-update` PR already exists.
+- **docs-update dedup**: The `docs-update` workflow skips if an open `claude/docs-update` PR already exists, preventing duplicate PRs.
+- **claude-code-action event types**: The action does NOT support `push` events. Use `schedule` + `workflow_dispatch` for non-interactive workflows. If you need push-triggered docs updates, use the Claude CLI directly instead of the action.
 - **FACTORY_PAT for PR creation**: The `docs-update` workflow uses `FACTORY_PAT` (not `GITHUB_TOKEN`) to create PRs so that downstream workflows (CI, code review) trigger on the PR. See the dark factory README for details on the GITHUB_TOKEN cascade limitation.

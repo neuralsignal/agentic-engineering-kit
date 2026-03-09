@@ -1,26 +1,19 @@
 # Documentation Update — keep docs/ in sync with source code.
-# Triggers on source code changes (push to main) and weekly schedule.
-# Creates a PR with documentation updates when drift is detected.
-# Does NOT trigger on docs/ changes (avoids self-referential loops).
+# Runs weekly and on manual dispatch. Uses Claude to detect drift
+# between code and documentation, then opens a PR with updates.
+#
+# Note: claude-code-action does not support the `push` event type.
+# Use workflow_dispatch for on-demand runs after code changes.
 #
 # Prerequisites:
 #   - CLAUDE_CODE_OAUTH_TOKEN secret (run `claude /install-github-app`)
 #   - FACTORY_PAT secret (for PR creation that triggers downstream workflows)
 #   - mkdocs.yml at repo root with docs/ structure
 #   - Package installable with pip install -e .
-#
-# TODO: Replace path filters with your package directory
 
 name: Docs Update
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "src/**"            # TODO: Replace with your package directory
-      - "pyproject.toml"
-      - "CHANGELOG.md"
-      - "README.md"
   schedule:
     - cron: "0 6 * * 1"    # Weekly Monday 06:00 UTC
   workflow_dispatch:
