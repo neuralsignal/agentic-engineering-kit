@@ -310,6 +310,19 @@ components:
     dependencies: [github-actions-claude]
     install_target: .github/workflows
 
+  - id: wf-pr-autofix
+    type: workflow
+    path: workflows/pr-autofix.yml
+    name: PR Auto-Fix
+    description: >
+      Automatically fixes CI failures on agent-created PRs. Downloads failure
+      logs, runs Claude to fix code, pushes fixes (up to 3 attempts). Promotes
+      draft PRs to ready-for-review when CI passes.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
   - id: wf-factory-orchestrator
     type: workflow
     path: workflows/factory-orchestrator.yml

@@ -84,6 +84,7 @@ jobs:
           # Check if branch has commits ahead of main
           if git log origin/main..${{ steps.branch.outputs.branch }} --oneline | head -1 | grep -q .; then
             gh pr create \
+              --draft \
               --title "$(echo '${{ github.event.issue.title }}' | head -c 70)" \
               --body "Closes #${{ github.event.issue.number }}
 
@@ -103,7 +104,7 @@ jobs:
             gh issue edit ${{ github.event.issue.number }} \
               --repo ${{ github.repository }} \
               --remove-label status:in-progress \
-              --add-label status:pr-created
+              --add-label status:pr-draft
           else
             echo "No commits on branch -- nothing to create PR for."
           fi

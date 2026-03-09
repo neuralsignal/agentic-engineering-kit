@@ -53,6 +53,10 @@ LABELS=(
   "source:test-coverage|#bfdadc|Created by test coverage analysis"
   "source:docs-freshness|#fef2c0|Created by docs freshness check"
   "source:workflow-upgrade|#ededed|Created by workflow upgrade check"
+  "status:pr-draft|#d4c5f9|Draft PR created, CI pending"
+  "autofix:1|#c5def5|First auto-fix attempt"
+  "autofix:2|#fef2c0|Second auto-fix attempt"
+  "autofix:3|#e99695|Third (final) auto-fix attempt"
 )
 
 echo "Creating/updating labels on $REPO..."

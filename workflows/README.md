@@ -20,10 +20,23 @@ Assessment Agents (scheduled)
   issue-implement agent (label-triggered)
         │
         ▼
-  Creates PR (feature branch, tests pass)
+  Creates Draft PR (feature branch)
         │
         ▼
-  pr-code-review + pr-docs-check (auto-review the PR)
+  CI runs on draft PR
+        │
+    ┌───┴───┐
+    ▼       ▼
+  PASS    FAIL
+    │       │
+    ▼       ▼
+  pr-autofix (ready job)    pr-autofix (fix job)
+  promotes draft → ready    reads logs, fixes code, pushes
+    │                         │ (max 3 attempts)
+    ▼                         │
+  pr-code-review +            ▼
+  pr-docs-check             CI re-runs → PASS → promote
+  (auto-review)               or → 3 failures → status:blocked
         │
         ▼
   Human reviews & merges (the ONLY manual step)
@@ -38,8 +51,9 @@ Assessment Agents (scheduled)
 | `claude-mention` | `@claude` in issue/PR | Sonnet | Interactive help |
 | `pr-code-review` | PR opened/sync/reopened | Sonnet (plugin) | Auto code review |
 | `issue-triage` | Issue opened | Haiku | Classify, label, comment |
-| `pr-docs-check` | PR opened/sync | Sonnet | Documentation compliance |
-| `issue-implement` | Issue labeled `claude:implement` | Opus (50 turns) | Implement issue as PR |
+| `pr-docs-check` | PR opened/sync/ready | Sonnet | Documentation compliance |
+| `issue-implement` | Issue labeled `claude:implement` | Opus (50 turns) | Implement issue as draft PR |
+| `pr-autofix` | CI completes on `claude/` branch | Sonnet (30 turns) | Fix CI failures on agent PRs, promote drafts on pass |
 | `factory-orchestrator` | Hourly schedule + manual | Shell only (no LLM) | Sweep orphaned issues, retry blocked, update dashboard |
 
 ### Assessment Agents (scheduled -- create issues)
@@ -166,8 +180,10 @@ Use this checklist when deploying the dark factory to a new repository:
 | Channel | Pattern | Example |
 |---------|---------|---------|
 | Labels | State machine | `claude:implement` triggers implementation |
+| Labels | Retry tracking | `autofix:1/2/3` tracks fix attempts on agent PRs |
 | Issues | Assessment → Implementation | dep-audit creates issue → issue-implement picks it up |
 | PR comments | Review feedback | pr-code-review and pr-docs-check post reviews |
+| Draft → Ready | Quality gate | pr-autofix promotes draft PRs after CI passes |
 | `[skip ci]` | Loop prevention | Auto-commits don't re-trigger workflows |
 | Concurrency groups | Dedup | One implementation per issue at a time |
 
@@ -186,6 +202,7 @@ Use this checklist when deploying the dark factory to a new repository:
 | test-coverage | read | -- | write | write |
 | docs-freshness | read | -- | write | write |
 | workflow-upgrade | read | -- | write | write |
+| pr-autofix | write | write | write | write |
 | factory-orchestrator | read | -- | write | -- |
 
 ## Customization
@@ -227,5 +244,6 @@ For a small-to-medium project (~15 PRs/month, ~10 issues/month):
 | Reactive agents (reviews, triage, mentions) | $7-15 |
 | Assessment agents (6 scheduled) | $2-3 |
 | Implementation agent (on-demand) | $5-15 |
+| Auto-fix agent (on CI failure) | $2-8 |
 | Factory orchestrator (pure shell) | $0 |
-| **Total** | **$15-35** |
+| **Total** | **$17-43** |
