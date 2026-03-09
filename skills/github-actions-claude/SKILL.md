@@ -489,6 +489,7 @@ and any error messages.
 | Tool not allowed error | Tool missing from `--allowedTools` | Add the tool to `claude_args: "--allowedTools Tool1,Tool2"` |
 | Labels not applied (silent) | `--add-label` args comma-separated | Use one `--add-label` flag per label |
 | Workflow triggers itself after auto-commit | Missing `[skip ci]` in commit message | Add `[skip ci]` suffix to auto-commit messages |
+| `Unsupported event type: push` | Using `push` trigger with `claude-code-action` | The action only supports interactive events (`issues`, `pull_request`), `schedule`, and `workflow_dispatch`. For push-triggered workflows, use the Claude CLI directly instead of the action |
 | Deprecated input warning | Using old v0.x inputs (`model`, `allowed_tools`, `max_turns`) | Migrate to `claude_args` (see Migration table below) |
 
 ### v0.x to v1.0 Input Migration
