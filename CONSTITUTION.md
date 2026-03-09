@@ -209,6 +209,7 @@ Before taking any of these actions, describe the impact and wait for confirmatio
 - No `sys.path` manipulation. Shared code is installed as editable packages via proper packaging (`pyproject.toml`).
 - Use `pytest` for all testing. No bare `assert` + `print` scripts. Keep package names descriptive and project-specific.
 - Use `hypothesis` for property-based tests on pure functions.
+- No use of `get` methods, such as `dict.get` or `list.get`, prefer `[]` indexing -- fail fast on missing keys.
 - Strict typing: type hints for every function argument and return value.
 - Pydantic for data validation and schema definitions. Settings via `pydantic-settings` or equivalent: read from env/config, no code defaults.
 - Custom exception classes. Do not catch bare `Exception`.
