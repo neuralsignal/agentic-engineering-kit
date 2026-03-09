@@ -197,7 +197,7 @@ Use this checklist when deploying the dark factory to a new repository:
 
 | Workflow | contents | pull-requests | issues | id-token |
 |----------|----------|---------------|--------|----------|
-| claude-mention | read | read | read | write |
+| claude-mention | write | write | write | write |
 | pr-code-review | read | write | read | write |
 | issue-triage | read | -- | write | write |
 | pr-docs-check | read | write | -- | write |

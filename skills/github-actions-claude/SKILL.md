@@ -53,10 +53,10 @@ Request minimum GitHub permissions. `id-token: write` is always required for OID
 
 ```yaml
 permissions:
-  # Interactive @claude mentions (comment-triggered)
-  contents: read
-  pull-requests: read
-  issues: read
+  # Interactive @claude mentions (can create branches, PRs, comment)
+  contents: write
+  pull-requests: write
+  issues: write
   id-token: write
 
   # PR review (read PR + post comment)
@@ -78,6 +78,11 @@ permissions:
   actions: read
   id-token: write
 ```
+
+**Note:** When using `claude_code_oauth_token`, the OAuth token authenticates Claude
+as a separate GitHub identity with its own scopes. Write operations (push, PR creation,
+issue comments) use the OAuth token, not `GITHUB_TOKEN`. The `permissions:` block governs
+`GITHUB_TOKEN` only. Setting write permissions ensures both auth paths work.
 
 When a step uses a Personal Access Token (PAT) to push to another repo, that step
 does not need elevated `contents: write` on the current workflow -- the PAT handles
@@ -180,7 +185,7 @@ claude_args: |
 
 | Task | Model | `--max-turns` |
 |------|-------|--------------|
-| Issue triage (classify + label) | `claude-haiku-4-5-20251001` | 5 |
+| Issue triage (classify + label) | `claude-haiku-4-5-20251001` | 10 |
 | PR review (comment) | `claude-sonnet-4-6` | 12 |
 | Complex document generation | `claude-sonnet-4-6` | 30 |
 | Multi-file code changes | `claude-sonnet-4-6` | 50 |
