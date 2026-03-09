@@ -55,6 +55,7 @@ Assessment Agents (scheduled)
 | `issue-implement` | Issue labeled `claude:implement` | Opus (50 turns) | Implement issue as draft PR |
 | `pr-autofix` | CI completes on `claude/` branch | Sonnet (30 turns) | Fix CI failures on agent PRs, promote drafts on pass |
 | `docs-deploy` | Push/PR to docs or source | None (pure build) | Build docs, deploy to GitHub Pages |
+| `docs-update` | Push to main (source) + weekly | Sonnet (20 turns) | Sync docs/ with codebase, open PR with updates |
 | `factory-orchestrator` | Hourly schedule + manual | Shell only (no LLM) | Sweep orphaned issues, retry blocked, update dashboard |
 
 ### Assessment Agents (scheduled -- create issues)

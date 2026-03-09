@@ -62,7 +62,7 @@ components:
       docs/ skeleton, and GitHub Pages deployment workflow.
     category: documentation
     platforms: [generic]
-    dependencies: [wf-docs-deploy]
+    dependencies: [wf-docs-deploy, wf-docs-update]
     install_target: skills
 
   - id: skill-creator
@@ -361,6 +361,20 @@ components:
     category: ci-cd
     platforms: [github-actions]
     dependencies: []
+    install_target: .github/workflows
+
+  - id: wf-docs-update
+    type: workflow
+    path: workflows/docs-update.yml
+    name: Docs Update
+    description: >
+      Keep docs/ in sync with source code. Triggers on source code changes
+      and weekly schedule. Uses Claude to detect drift between code and
+      documentation, then opens a PR with updates. Skips if an open
+      docs-update PR already exists.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude, wf-docs-deploy]
     install_target: .github/workflows
 
   - id: wf-factory-orchestrator
