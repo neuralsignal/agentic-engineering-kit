@@ -40,6 +40,7 @@ Assessment Agents (scheduled)
 | `issue-triage` | Issue opened | Haiku | Classify, label, comment |
 | `pr-docs-check` | PR opened/sync | Sonnet | Documentation compliance |
 | `issue-implement` | Issue labeled `claude:implement` | Opus (50 turns) | Implement issue as PR |
+| `factory-orchestrator` | Hourly schedule + manual | Shell only (no LLM) | Sweep orphaned issues, retry blocked, update dashboard |
 
 ### Assessment Agents (scheduled -- create issues)
 
@@ -52,13 +53,28 @@ Assessment Agents (scheduled)
 | `docs-freshness` | Monthly 1st 06:00 UTC | Haiku | Stale docs, README drift |
 | `workflow-upgrade` | Monthly 1st 07:00 UTC | Haiku | Outdated action versions |
 
+## Known Limitation: GITHUB_TOKEN Cascade Prevention
+
+GitHub Actions **prevents cascading triggers** when workflows use `secrets.GITHUB_TOKEN`. If a workflow creates or labels an issue using `GITHUB_TOKEN`, the resulting `issues.labeled` event does **not** trigger other workflows. This is by design to prevent infinite loops, but it breaks the autonomous loop:
+
+```
+Assessment agent (GITHUB_TOKEN) creates issue with claude:implement label
+  → issues.labeled event is suppressed
+  → issue-implement.yml never fires
+  → Issue sits orphaned forever
+```
+
+**Fix**: The `factory-orchestrator` workflow uses a `FACTORY_PAT` (personal access token) to re-label orphaned issues. PAT-triggered events **do** fire downstream workflows, restoring the autonomous loop. See the Factory Orchestrator section below.
+
 ## Prerequisites
 
 Before installing the dark factory workflows, ensure:
 
-- **`gh` CLI installed and authenticated** — required for `setup-labels.sh` and for monitoring workflow runs. Run `gh auth status` to verify.
+- **`gh` CLI installed and authenticated** — required for `setup-factory.sh` and for monitoring workflow runs. Run `gh auth status` to verify.
 
-- **`CLAUDE_CODE_OAUTH_TOKEN`** — an OAuth token that grants Claude Code permission to act on your repo. Generate it by running `claude /install-github-app` locally, then store the token as a repository secret (see Installation step 4). This is the only secret you need to add manually.
+- **`CLAUDE_CODE_OAUTH_TOKEN`** — an OAuth token that grants Claude Code permission to act on your repo. Generate it by running `claude /install-github-app` locally, then store the token as a repository secret (see Installation step 4).
+
+- **`FACTORY_PAT`** — a personal access token used by the factory orchestrator to re-label issues (bypassing the GITHUB_TOKEN cascade limitation). Create a fine-grained PAT scoped to the target repo with read/write permissions for: actions, commit statuses, issues, and pull requests. Store as a repository secret named `FACTORY_PAT`. **Note**: fine-grained PATs have [known issues with label operations on public repos](https://github.com/cli/cli/issues/9166). If label operations fail, fall back to a classic PAT with `public_repo` scope.
 
 - **`GITHUB_TOKEN`** — automatically provided by GitHub Actions to every workflow run. No setup needed. The workflows reference it as `${{ secrets.GITHUB_TOKEN }}`.
 
@@ -72,7 +88,16 @@ Before installing the dark factory workflows, ensure:
 
 ## Installation
 
-### 1. Copy workflows
+### 1. Run setup script
+
+```bash
+cd scripts/
+./setup-factory.sh --repo owner/repo
+```
+
+This creates labels, the `[Factory Dashboard]` issue, and checks that required secrets are configured.
+
+### 2. Copy workflows
 
 Copy desired workflow files to your project's `.github/workflows/`:
 
@@ -86,13 +111,6 @@ cp workflows/pr-code-review.yml /path/to/project/.github/workflows/
 ./install.sh wf-claude-mention --target /path/to/project
 ```
 
-### 2. Create labels
-
-```bash
-cd scripts/
-./setup-labels.sh --repo owner/repo
-```
-
 ### 3. Set up CLAUDE.md
 
 Copy `templates/CLAUDE-factory.md` into your project's `CLAUDE.md` and fill in the project-specific sections (build commands, standards, etc.).
@@ -100,8 +118,9 @@ Copy `templates/CLAUDE-factory.md` into your project's `CLAUDE.md` and fill in t
 ### 4. Add secrets
 
 1. Run `claude /install-github-app` locally to generate a `CLAUDE_CODE_OAUTH_TOKEN`.
-2. Navigate to your repo's **Settings → Secrets and variables → Actions**.
-3. Click **New repository secret**, name it `CLAUDE_CODE_OAUTH_TOKEN`, and paste the token value.
+2. Create a fine-grained PAT (or classic PAT with `public_repo` scope) for `FACTORY_PAT` — see Prerequisites.
+3. Navigate to your repo's **Settings → Secrets and variables → Actions**.
+4. Add both `CLAUDE_CODE_OAUTH_TOKEN` and `FACTORY_PAT` as repository secrets.
 
 `GITHUB_TOKEN` is provided automatically by GitHub Actions — no manual setup required.
 
@@ -126,11 +145,12 @@ gh run list --repo owner/repo --limit 5
 Use this checklist when deploying the dark factory to a new repository:
 
 - [ ] `CLAUDE_CODE_OAUTH_TOKEN` secret added to repo
+- [ ] `FACTORY_PAT` secret added to repo (fine-grained PAT with actions/commit-statuses/issues/PRs read/write; classic PAT with `public_repo` scope if label ops fail on public repos)
 - [ ] Workflow permissions set to **Read and write** + **Allow GitHub Actions to create and approve pull requests**
-- [ ] Labels created via `setup-labels.sh --repo owner/repo`
+- [ ] `setup-factory.sh --repo owner/repo` run (creates labels + Factory Dashboard issue)
 - [ ] `CLAUDE.md` created from `templates/CLAUDE-factory.md` and customized
-- [ ] Workflow files copied to `.github/workflows/`
-- [ ] Smoke tests passed: mention, triage, implement, review, assessment
+- [ ] Workflow files copied to `.github/workflows/` (including `factory-orchestrator.yml`)
+- [ ] Smoke tests passed: mention, triage, implement, review, assessment, orchestrator
 
 ## Core Design Decisions
 
@@ -166,6 +186,7 @@ Use this checklist when deploying the dark factory to a new repository:
 | test-coverage | read | -- | write | write |
 | docs-freshness | read | -- | write | write |
 | workflow-upgrade | read | -- | write | write |
+| factory-orchestrator | read | -- | write | -- |
 
 ## Customization
 
@@ -206,4 +227,5 @@ For a small-to-medium project (~15 PRs/month, ~10 issues/month):
 | Reactive agents (reviews, triage, mentions) | $7-15 |
 | Assessment agents (6 scheduled) | $2-3 |
 | Implementation agent (on-demand) | $5-15 |
+| Factory orchestrator (pure shell) | $0 |
 | **Total** | **$15-35** |

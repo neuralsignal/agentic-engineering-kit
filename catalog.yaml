@@ -309,3 +309,17 @@ components:
     platforms: [github-actions]
     dependencies: [github-actions-claude]
     install_target: .github/workflows
+
+  - id: wf-factory-orchestrator
+    type: workflow
+    path: workflows/factory-orchestrator.yml
+    name: Factory Orchestrator
+    description: >
+      Hourly sweep for orphaned issues (claude:implement label set by
+      GITHUB_TOKEN but never triggered). Re-labels with FACTORY_PAT to
+      fire issue-implement. Retries blocked issues after 3 days. Posts
+      dashboard status summary. Pure shell, no LLM cost.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: []
+    install_target: .github/workflows
