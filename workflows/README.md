@@ -39,18 +39,36 @@ Assessment Agents (scheduled)
 | `pr-code-review` | PR opened/sync/reopened | Sonnet (plugin) | Auto code review |
 | `issue-triage` | Issue opened | Haiku | Classify, label, comment |
 | `pr-docs-check` | PR opened/sync | Sonnet | Documentation compliance |
-| `issue-implement` | Issue labeled `claude:implement` | Sonnet (50 turns) | Implement issue as PR |
+| `issue-implement` | Issue labeled `claude:implement` | Opus (50 turns) | Implement issue as PR |
 
 ### Assessment Agents (scheduled -- create issues)
 
 | Workflow | Schedule | Model | Creates Issues For |
 |----------|----------|-------|--------------------|
-| `dep-audit` | Weekly Mon 06:00 UTC | Sonnet | Outdated deps, vulnerabilities |
-| `security-scan` | Weekly Wed 06:00 UTC | Sonnet | Hardcoded secrets, injection, insecure patterns |
+| `dep-audit` | Weekly Mon 06:00 UTC | Sonnet (30 turns) | Outdated deps, vulnerabilities |
+| `security-scan` | Weekly Wed 06:00 UTC | Opus (30 turns) | Hardcoded secrets, injection, insecure patterns |
 | `code-quality` | Weekly Fri 06:00 UTC | Sonnet | Long files, complexity, duplication |
 | `test-coverage` | Weekly Sun 06:00 UTC | Sonnet | Files below threshold, untested paths |
 | `docs-freshness` | Monthly 1st 06:00 UTC | Haiku | Stale docs, README drift |
 | `workflow-upgrade` | Monthly 1st 07:00 UTC | Haiku | Outdated action versions |
+
+## Prerequisites
+
+Before installing the dark factory workflows, ensure:
+
+- **`gh` CLI installed and authenticated** — required for `setup-labels.sh` and for monitoring workflow runs. Run `gh auth status` to verify.
+
+- **`CLAUDE_CODE_OAUTH_TOKEN`** — an OAuth token that grants Claude Code permission to act on your repo. Generate it by running `claude /install-github-app` locally, then store the token as a repository secret (see Installation step 4). This is the only secret you need to add manually.
+
+- **`GITHUB_TOKEN`** — automatically provided by GitHub Actions to every workflow run. No setup needed. The workflows reference it as `${{ secrets.GITHUB_TOKEN }}`.
+
+- **Workflow permissions** — GitHub Actions must have **read and write permissions** on the repository, and the option **"Allow GitHub Actions to create and approve pull requests"** must be enabled. Configure this at:
+
+  > **Settings → Actions → General → Workflow permissions**
+
+  Without this:
+  - `issue-implement` will fail when attempting to create PRs (`"GitHub Actions is not permitted to create or approve pull requests"`)
+  - `pr-code-review` will fail when posting review comments (insufficient write access to pull-requests)
 
 ## Installation
 
@@ -81,11 +99,38 @@ Copy `templates/CLAUDE-factory.md` into your project's `CLAUDE.md` and fill in t
 
 ### 4. Add secrets
 
-Add `CLAUDE_CODE_OAUTH_TOKEN` to your repo secrets (from `claude /install-github-app`).
+1. Run `claude /install-github-app` locally to generate a `CLAUDE_CODE_OAUTH_TOKEN`.
+2. Navigate to your repo's **Settings → Secrets and variables → Actions**.
+3. Click **New repository secret**, name it `CLAUDE_CODE_OAUTH_TOKEN`, and paste the token value.
+
+`GITHUB_TOKEN` is provided automatically by GitHub Actions — no manual setup required.
 
 ### 5. Test
 
-Manually dispatch each workflow from the Actions tab to verify.
+Verify each layer of the dark factory in order. Each step builds on the previous:
+
+1. **`claude-mention`** — Comment `@claude` on any issue with a simple question. Expect a reply within ~60 seconds.
+2. **`issue-triage`** — Open a new issue. Expect labels and a triage comment within ~30 seconds.
+3. **`issue-implement`** — Add the `claude:implement` label to an issue. Expect a new branch and PR within 2-5 minutes.
+4. **`pr-code-review`** — The PR from step 3 should automatically trigger a code review comment.
+5. **Assessment agents** — Go to the **Actions** tab, select an assessment workflow (e.g., `dep-audit`), and click **Run workflow** to trigger manually.
+
+Monitor workflow runs:
+
+```bash
+gh run list --repo owner/repo --limit 5
+```
+
+## Deployment Checklist
+
+Use this checklist when deploying the dark factory to a new repository:
+
+- [ ] `CLAUDE_CODE_OAUTH_TOKEN` secret added to repo
+- [ ] Workflow permissions set to **Read and write** + **Allow GitHub Actions to create and approve pull requests**
+- [ ] Labels created via `setup-labels.sh --repo owner/repo`
+- [ ] `CLAUDE.md` created from `templates/CLAUDE-factory.md` and customized
+- [ ] Workflow files copied to `.github/workflows/`
+- [ ] Smoke tests passed: mention, triage, implement, review, assessment
 
 ## Core Design Decisions
 
@@ -134,6 +179,23 @@ All customization happens in your project's `CLAUDE.md`. The workflows read CLAU
 - **CI Setup** -- steps needed before running tests (e.g., pixi install, npm install)
 
 See `templates/CLAUDE-factory.md` for the full template.
+
+## Troubleshooting
+
+**"GitHub Actions is not permitted to create or approve pull requests"**
+The `issue-implement` or `pr-code-review` workflow fails with this error. Fix: go to **Settings → Actions → General → Workflow permissions** and enable **Read and write permissions** + **Allow GitHub Actions to create and approve pull requests**.
+
+**PR Code Review posts no review**
+The `pr-code-review` workflow runs but no review comment appears. This is typically the same permissions issue — the workflow needs write access to pull-requests at the repo level, not just in the YAML `permissions:` block.
+
+**Assessment agent hits max turns without completing**
+The default `--max-turns` may be too low for projects with many dependencies or large codebases. Increase the value in the workflow YAML (e.g., `--max-turns 30`). The `dep-audit` and `security-scan` workflows ship with 30 turns by default.
+
+**`setup-labels.sh` creates garbled labels**
+Older versions of the script used `:` as a delimiter, which conflicted with label names like `claude:implement`. Ensure you're using the latest version of `setup-labels.sh`, which uses `|` as the delimiter.
+
+**Claude can't find CLAUDE.md**
+`CLAUDE.md` must be at the repository root. Ensure the checkout step in each workflow succeeds (check for `actions/checkout` errors in the workflow logs).
 
 ## Estimated Cost
 
