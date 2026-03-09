@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.0] - 2026-03-09
+
+### Added
+- `INTEGRATING.md` — operational integration guide for AI coding assistants (component selection heuristics, file placement, platform symlinks, verification)
+
+### Changed
+- `README.md` rewritten — leads with AI-first integration prompt, demotes manual methods, removes full component table (catalog.yaml is the source of truth)
+- `docs/composition-guide.md` — added "AI-Assisted Integration" as Approach 0 (recommended)
+
 ## [0.2.0] - 2026-03-08
 
 ### Added

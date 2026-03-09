@@ -1,6 +1,28 @@
 # Composition Guide
 
-Three approaches for integrating the Agentic Engineering Kit into your project. Choose based on your team's workflow and update preferences.
+Four approaches for integrating the Agentic Engineering Kit into your project. Choose based on your team's workflow and update preferences.
+
+## Approach 0: AI-Assisted Integration (Recommended)
+
+Ask your AI coding assistant to integrate the kit for you. Paste this prompt:
+
+> Fetch the component catalog from
+> https://raw.githubusercontent.com/neuralsignal/agentic-engineering-kit/main/catalog.yaml
+> and the integration guide from
+> https://raw.githubusercontent.com/neuralsignal/agentic-engineering-kit/main/INTEGRATING.md
+> then help me select and install components for this project.
+
+The assistant reads the catalog, assesses your project (language, CI, existing structure), recommends components, and installs them — including platform symlinks and CLAUDE.md setup.
+
+See [INTEGRATING.md](../INTEGRATING.md) for the full protocol the assistant follows.
+
+### Pros and Cons
+
+| Pros | Cons |
+|------|------|
+| Zero manual steps — the assistant does everything | Requires an AI coding assistant |
+| Context-aware component selection | Assistant may need guidance on edge cases |
+| Handles symlinks and CLAUDE.md automatically | |
 
 ## Approach 1: Git Subtree (Recommended for Teams)
 
