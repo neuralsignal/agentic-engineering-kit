@@ -2,11 +2,11 @@ schema_version: "1"
 
 # Each component has:
 #   id:             Unique identifier used by install.sh
-#   type:           constitution | rule | skill | agent
+#   type:           constitution | rule | skill | agent | workflow
 #   path:           Path relative to repo root
 #   name:           Human-readable name
 #   description:    What this component provides
-#   category:       Logical grouping (core, planning, testing, data-ml, security, etc.)
+#   category:       Logical grouping (core, planning, testing, data-ml, security, ci-cd, etc.)
 #   platforms:      Which agent platforms this works with
 #   dependencies:   Other component IDs this requires
 #   install_target: Where to copy relative to the target project root ("." = project root)
@@ -175,3 +175,137 @@ components:
     platforms: [generic]
     dependencies: []
     install_target: rules
+
+  # --- Workflows (Dark Factory) ---
+
+  - id: wf-claude-mention
+    type: workflow
+    path: workflows/claude-mention.yml
+    name: Claude Mention Handler
+    description: >
+      Interactive @claude mentions on issues and PRs. Responds to @claude
+      in comments, reviews, and issue bodies.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
+  - id: wf-pr-code-review
+    type: workflow
+    path: workflows/pr-code-review.yml
+    name: PR Code Review
+    description: >
+      Automatic code review on pull requests using the claude-code-plugins
+      code-review plugin. Reviews bot-created PRs too.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
+  - id: wf-issue-triage
+    type: workflow
+    path: workflows/issue-triage.yml
+    name: Issue Auto-Triage
+    description: >
+      Automatically classifies and labels newly opened issues. Applies
+      type, priority, and status labels based on CLAUDE.md taxonomy.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
+  - id: wf-pr-docs-check
+    type: workflow
+    path: workflows/pr-docs-check.yml
+    name: PR Documentation Check
+    description: >
+      Checks PRs for documentation compliance: missing docstrings,
+      README updates, changelog entries.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
+  - id: wf-issue-implement
+    type: workflow
+    path: workflows/issue-implement.yml
+    name: Issue Implementer
+    description: >
+      Implements issues labeled claude:implement as PRs. Creates branch,
+      implements changes, runs tests, and opens a PR.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
+  - id: wf-dep-audit
+    type: workflow
+    path: workflows/dep-audit.yml
+    name: Dependency Audit
+    description: >
+      Weekly dependency and vulnerability audit. Creates issues for
+      outdated deps and known vulnerabilities.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
+  - id: wf-security-scan
+    type: workflow
+    path: workflows/security-scan.yml
+    name: Security Scan
+    description: >
+      Weekly security assessment. Scans for hardcoded secrets, injection
+      vulnerabilities, insecure patterns, and missing input validation.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
+  - id: wf-code-quality
+    type: workflow
+    path: workflows/code-quality.yml
+    name: Code Quality Check
+    description: >
+      Weekly code quality assessment. Finds long files, high complexity,
+      code duplication, dead code, and missing type hints.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
+  - id: wf-test-coverage
+    type: workflow
+    path: workflows/test-coverage.yml
+    name: Test Coverage Analysis
+    description: >
+      Weekly test coverage analysis. Identifies files below coverage
+      threshold and suggests test cases for uncovered code paths.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
+  - id: wf-docs-freshness
+    type: workflow
+    path: workflows/docs-freshness.yml
+    name: Documentation Freshness Check
+    description: >
+      Monthly documentation staleness check. Flags docs not updated
+      in 90+ days and README drift from actual CLI/API.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
+  - id: wf-workflow-upgrade
+    type: workflow
+    path: workflows/workflow-upgrade.yml
+    name: Workflow Upgrade Check
+    description: >
+      Monthly GitHub Actions version check. Flags outdated action
+      versions and deprecated inputs.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows

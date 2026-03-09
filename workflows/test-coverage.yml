@@ -1,0 +1,53 @@
+name: Test Coverage Analysis
+
+on:
+  schedule:
+    - cron: "0 6 * * 0" # Weekly Sunday 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  id-token: write
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Run Claude test coverage analysis
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_args: "--model claude-sonnet-4-6 --max-turns 25 --allowedTools Read,Glob,Grep,Bash"
+          prompt: |
+            You are a test coverage analysis agent.
+            Read CLAUDE.md for project-specific test and coverage configuration.
+
+            Analyze test coverage:
+            1. Read CLAUDE.md to find the coverage command, threshold, and test framework.
+            2. Check the CI Setup section -- follow any setup steps needed before running tests
+               (e.g., install dependencies, set up system packages).
+            3. Run the project's coverage command.
+            4. Analyze results:
+               - Files below the coverage threshold (from CLAUDE.md, default: 80%)
+               - Critical code paths without any tests
+               - Edge cases that should have tests (error handling, boundary conditions)
+               - Whether property-based tests exist for pure functions (if the project uses hypothesis/fast-check)
+            5. Read source files with low coverage to understand what's untested.
+
+            For each finding:
+            a. Check for existing open issues:
+               gh issue list --repo ${{ github.repository }} --label source:test-coverage --state open --json title --jq '.[].title'
+            b. If no matching issue, create one:
+               - Title: "[test-coverage] <module/file>: <current>% (threshold: <target>%)"
+               - Labels: type:chore, priority:2, claude:implement, source:test-coverage
+               - Use --body-file /tmp/issue-<n>.md
+               - Apply labels with separate --add-label flags
+               - Body should describe what's untested and suggest test cases
+            c. If matching issue exists, add a comment with updated coverage data.
+
+            Write summary to /tmp/summary.md and post to Factory Dashboard issue if it exists.

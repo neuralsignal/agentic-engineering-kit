@@ -70,8 +70,19 @@ See [docs/composition-guide.md](docs/composition-guide.md) for detailed instruct
 | `mermaid-obsidian` | rule | Mermaid diagram conventions for Obsidian compatibility. |
 | `github-actions-claude` | skill | Pattern catalog for GitHub Actions workflows using `anthropics/claude-code-action`. |
 | `skill-creator` | skill | Create, improve, and benchmark agent skills with eval runner and review webapp. *(Apache 2.0, from [anthropics/skills](https://github.com/anthropics/skills))* |
+| `wf-claude-mention` | workflow | Interactive `@claude` mentions on issues and PRs. |
+| `wf-pr-code-review` | workflow | Automatic code review on pull requests (plugin-based). |
+| `wf-issue-triage` | workflow | Auto-classify and label newly opened issues. |
+| `wf-pr-docs-check` | workflow | PR documentation compliance check. |
+| `wf-issue-implement` | workflow | Implement issues labeled `claude:implement` as PRs. |
+| `wf-dep-audit` | workflow | Weekly dependency and vulnerability audit. |
+| `wf-security-scan` | workflow | Weekly security assessment (OWASP patterns). |
+| `wf-code-quality` | workflow | Weekly code quality and complexity check. |
+| `wf-test-coverage` | workflow | Weekly test coverage analysis. |
+| `wf-docs-freshness` | workflow | Monthly documentation staleness check. |
+| `wf-workflow-upgrade` | workflow | Monthly GitHub Actions version check. |
 
-Components are listed in [catalog.yaml](catalog.yaml). Rules are auto-loaded agent guidance; skills are on-demand workflows following the [Agent Skills specification](https://agentskills.io/specification).
+Components are listed in [catalog.yaml](catalog.yaml). Rules are auto-loaded agent guidance; skills are on-demand workflows following the [Agent Skills specification](https://agentskills.io/specification). Workflows are GitHub Actions CI/CD automation -- see [workflows/README.md](workflows/README.md) for the dark factory concept.
 
 ## Platform Support
 
@@ -103,7 +114,9 @@ agentic-engineering-kit/
 ├── rules/                   # Rules (auto-loaded guidance for agents)
 ├── skills/                  # Skills (on-demand workflows with scripts)
 ├── agents/                  # Agents (autonomous subagent definitions)
+├── workflows/               # GitHub Actions workflows (dark factory)
 ├── templates/               # Creation procedure guides
+├── scripts/                 # Utility scripts (setup-labels.sh)
 └── docs/                    # Detailed documentation
 ```
 
