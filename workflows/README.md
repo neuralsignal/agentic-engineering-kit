@@ -147,9 +147,10 @@ Verify each layer of the dark factory in order. Each step builds on the previous
 
 1. **`claude-mention`** — Comment `@claude` on any issue with a simple question. Expect a reply within ~60 seconds.
 2. **`issue-triage`** — Open a new issue. Expect labels and a triage comment within ~30 seconds.
-3. **`issue-implement`** — Add the `claude:implement` label to an issue. Expect a new branch and PR within 2-5 minutes.
-4. **`pr-code-review`** — The PR from step 3 should automatically trigger a code review comment.
-5. **Assessment agents** — Go to the **Actions** tab, select an assessment workflow (e.g., `dep-audit`), and click **Run workflow** to trigger manually.
+3. **`issue-implement`** — Add the `claude:implement` label to an issue. Expect a new branch and **draft** PR within 2-5 minutes. The issue should transition to `status:pr-draft`.
+4. **CI → `pr-autofix`** — CI runs on the draft PR. If it passes, `pr-autofix` promotes the draft to ready-for-review and the issue transitions to `status:pr-created`. If CI fails, `pr-autofix` attempts to fix the code (up to 3 times).
+5. **`pr-code-review` + `pr-docs-check`** — Both trigger when the draft is promoted to ready. Expect review comments on the PR.
+6. **Assessment agents** — Go to the **Actions** tab, select an assessment workflow (e.g., `dep-audit`), and click **Run workflow** to trigger manually.
 
 Monitor workflow runs:
 
@@ -231,6 +232,9 @@ The `issue-implement` workflow creates a draft PR, but CI, `pr-code-review`, and
 
 **Auto-fix loop never triggers**
 `pr-autofix` triggers on `workflow_run` completion of the CI workflow. If CI never runs (see above), `pr-autofix` never fires. Verify: (1) CI ran on the PR branch, (2) the branch starts with `claude/`, (3) CI conclusion is `failure` (for fix) or `success` (for ready).
+
+**`FACTORY_PAT` label operations fail on public repos**
+Fine-grained PATs have [known issues with label operations on public repos](https://github.com/cli/cli/issues/9166). Symptoms: `gh issue edit --add-label` silently fails or returns a 404. Fix: use a classic PAT with `public_repo` scope instead of a fine-grained PAT. This affects both `issue-implement` (PR creation) and `factory-orchestrator` (issue re-labeling).
 
 **PR Code Review posts no review**
 The `pr-code-review` workflow runs but no review comment appears. This is typically the same permissions issue — the workflow needs write access to pull-requests at the repo level, not just in the YAML `permissions:` block.
