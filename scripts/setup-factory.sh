@@ -59,10 +59,33 @@ DASHBOARD=$(gh issue list --repo "$REPO" \
 if [ -n "$DASHBOARD" ]; then
   echo "  Factory Dashboard already exists: issue #$DASHBOARD"
 else
+  cat > /tmp/factory-dashboard-body.md << 'DASHEOF'
+# Factory Dashboard
+
+Status aggregation for the dark factory autonomous engineering loop.
+
+**Legend:** Queued → In Progress → Draft PR → PR Created → Human Review & Merge
+
+---
+
+## Status
+
+| Stage | Count |
+|-------|-------|
+| Queued (claude:implement) | 0 |
+| In Progress | 0 |
+| Draft PR (CI pending) | 0 |
+| PR Created (awaiting review) | 0 |
+| Auto-fix (attempt 1/2/3) | 0 / 0 / 0 |
+| Blocked | 0 |
+
+*Awaiting first factory-orchestrator run...*
+DASHEOF
+
   DASHBOARD_URL=$(gh issue create \
     --repo "$REPO" \
     --title "[Factory Dashboard]" \
-    --body "Status aggregation point for dark factory assessment agents. The factory-orchestrator workflow posts periodic status summaries as comments on this issue.")
+    --body-file /tmp/factory-dashboard-body.md)
   echo "  Created Factory Dashboard: $DASHBOARD_URL"
 fi
 echo ""

@@ -56,7 +56,7 @@ Assessment Agents (scheduled)
 | `pr-autofix` | CI completes on `claude/` branch | Sonnet (30 turns) | Fix CI failures on agent PRs, promote drafts on pass |
 | `docs-deploy` | Push/PR to docs or source | None (pure build) | Build docs, deploy to GitHub Pages |
 | `docs-update` | Weekly schedule + manual | Sonnet (20 turns) | Sync docs/ with codebase, open PR with updates |
-| `factory-orchestrator` | Hourly schedule + manual | Shell only (no LLM) | Sweep orphaned issues, retry blocked, update dashboard |
+| `factory-orchestrator` | Hourly schedule + manual | Shell only (no LLM) | Sweep orphaned issues, retry blocked, edit dashboard issue body in-place |
 
 ### Assessment Agents (scheduled -- create issues)
 
@@ -114,7 +114,7 @@ cd scripts/
 ./setup-factory.sh --repo owner/repo
 ```
 
-This creates labels, the `[Factory Dashboard]` issue, and checks that required secrets are configured.
+This creates labels, the `[Factory Dashboard]` issue (with header template), and checks that required secrets are configured. The orchestrator edits the issue body in-place each hour; assessment agents post sticky comments (one per agent, updated in-place via HTML markers).
 
 ### 2. Copy workflows
 
