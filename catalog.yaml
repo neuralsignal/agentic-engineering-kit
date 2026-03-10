@@ -65,6 +65,20 @@ components:
     dependencies: [wf-docs-deploy, wf-docs-update]
     install_target: skills
 
+  - id: docs-manager
+    type: skill
+    path: skills/docs-manager
+    name: Docs Manager
+    description: >
+      Set up and operate a GitHub-based docs repository for a software team.
+      Covers the two-flow model (Issues = trackable work, Markdown = permanent records),
+      label taxonomy, Obsidian Templater templates, automated issue sync, Claude-powered
+      PR review, weekly code->docs sync, and GitHub Pages deployment.
+    category: documentation
+    platforms: [github-actions]
+    dependencies: [wf-issue-triage, wf-claude-mention, wf-issue-sync, wf-project-sync, wf-docs-review, wf-code-sync-weekly]
+    install_target: skills
+
   - id: skill-creator
     type: skill
     path: skills/skill-creator
@@ -375,6 +389,58 @@ components:
     category: ci-cd
     platforms: [github-actions]
     dependencies: [github-actions-claude, wf-docs-deploy]
+    install_target: .github/workflows
+
+  - id: wf-issue-sync
+    type: workflow
+    path: workflows/issue-sync.yml
+    name: Issue Sync
+    description: >
+      Mirrors GitHub Issues to markdown snapshots in sync/issues/. Triggered on
+      sync-to-docs label, issue close, weekly resync, and manual dispatch.
+      Enables Obsidian vault search over issue content.
+    category: documentation
+    platforms: [github-actions]
+    dependencies: [docs-manager]
+    install_target: .github/workflows
+
+  - id: wf-project-sync
+    type: workflow
+    path: workflows/project-sync.yml
+    name: Project Board Sync
+    description: >
+      Mirrors GitHub Projects v2 board state to sync/projects/ as a kanban
+      markdown snapshot. Runs daily. Requires ORG_PROJECTS_TOKEN secret with
+      read:org and read:project scopes.
+    category: documentation
+    platforms: [github-actions]
+    dependencies: [docs-manager]
+    install_target: .github/workflows
+
+  - id: wf-docs-review
+    type: workflow
+    path: workflows/docs-review.yml
+    name: Docs Review
+    description: >
+      Claude reviews PRs that touch projects/ or sops/. Checks YAML frontmatter,
+      naming conventions, absence of vault syntax, and required sections in
+      meeting notes and decision records.
+    category: documentation
+    platforms: [github-actions]
+    dependencies: [github-actions-claude, docs-manager]
+    install_target: .github/workflows
+
+  - id: wf-code-sync-weekly
+    type: workflow
+    path: workflows/code-sync-weekly.yml
+    name: Code Sync Weekly
+    description: >
+      Weekly cross-repo sync: queries registered code repos for merged PRs, releases,
+      and docs-needed issues, then opens a draft PR updating architecture docs and
+      status files. Requires DOCS_WRITE_TOKEN and CLAUDE_CODE_OAUTH_TOKEN.
+    category: documentation
+    platforms: [github-actions]
+    dependencies: [github-actions-claude, docs-manager]
     install_target: .github/workflows
 
   - id: wf-factory-orchestrator

@@ -1,0 +1,212 @@
+# Code Sync Weekly — query registered code repos and update project docs.
+#
+# Runs weekly Monday 06:00 UTC and on manual dispatch.
+#
+# For each code repo listed in CLAUDE.md under "## Code Repositories":
+#   1. Fetches merged PRs, new releases, and open issues labelled docs-needed
+#      from the past 7 days.
+#   2. Runs Claude to detect if architecture.md or status docs need updating.
+#   3. Opens a draft PR with suggested documentation changes.
+#
+# Prerequisites:
+#   - DOCS_WRITE_TOKEN: fine-grained PAT with Contents: Read+Write and
+#     Pull requests: Read+Write on this docs repo. Store in this repo's secrets.
+#   - Each code repo must have DOCS_WRITE_TOKEN in its own secrets (same PAT).
+#   - CLAUDE_CODE_OAUTH_TOKEN secret (run `claude /install-github-app`)
+
+name: Code Sync Weekly
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"    # Weekly Monday 06:00 UTC
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: "Single code repo to sync (org/name). Leave blank to sync all."
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: code-sync-weekly
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.DOCS_WRITE_TOKEN }}
+
+      - name: Check for existing code-sync PR
+        id: existing
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_WRITE_TOKEN }}
+        run: |
+          OPEN_PR=$(gh pr list \
+            --repo ${{ github.repository }} \
+            --head "claude/code-sync" \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')
+          if [ -n "$OPEN_PR" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "Existing code-sync PR #${OPEN_PR} is open. Skipping."
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Parse registered repos from CLAUDE.md
+        if: steps.existing.outputs.skip != 'true'
+        id: repos
+        run: |
+          if [ -n "${{ github.event.inputs.repo }}" ]; then
+            echo "list=${{ github.event.inputs.repo }}" >> $GITHUB_OUTPUT
+          else
+            # Extract repos from "## Code Repositories" table in CLAUDE.md
+            # Expected format: | project-name | org/repo | projects/folder |
+            REPOS=$(awk '/^## Code Repositories/,/^## /' CLAUDE.md \
+              | grep '^\s*|' \
+              | tail -n +3 \
+              | awk -F'|' '{print $3}' \
+              | tr -d ' ' \
+              | grep -v '^$' \
+              | tr '\n' ' ')
+            echo "list=$REPOS" >> $GITHUB_OUTPUT
+            echo "Repos to sync: $REPOS"
+          fi
+
+      - name: Collect activity from code repos
+        if: steps.existing.outputs.skip != 'true'
+        id: activity
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_WRITE_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/code-activity
+          SINCE=$(date -u -d "7 days ago" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null \
+            || date -u -v-7d +"%Y-%m-%dT%H:%M:%SZ")
+
+          for REPO in ${{ steps.repos.outputs.list }}; do
+            echo "--- Fetching activity for $REPO ---"
+            OUTFILE="/tmp/code-activity/$(echo $REPO | tr '/' '_').json"
+
+            # Merged PRs
+            MERGED_PRS=$(gh pr list --repo "$REPO" \
+              --state merged \
+              --search "merged:>$SINCE" \
+              --limit 50 \
+              --json number,title,mergedAt,url,body \
+              2>/dev/null || echo "[]")
+
+            # New releases
+            RELEASES=$(gh release list --repo "$REPO" \
+              --limit 5 \
+              --json tagName,publishedAt,url,body \
+              2>/dev/null || echo "[]")
+
+            # Open issues needing docs
+            DOCS_NEEDED=$(gh issue list --repo "$REPO" \
+              --label "docs-needed" \
+              --state open \
+              --limit 20 \
+              --json number,title,url,body \
+              2>/dev/null || echo "[]")
+
+            jq -n \
+              --arg repo "$REPO" \
+              --argjson merged_prs "$MERGED_PRS" \
+              --argjson releases "$RELEASES" \
+              --argjson docs_needed "$DOCS_NEEDED" \
+              '{repo: $repo, merged_prs: $merged_prs, releases: $releases, docs_needed: $docs_needed}' \
+              > "$OUTFILE"
+
+            echo "Saved activity for $REPO"
+          done
+
+      - name: Create branch
+        if: steps.existing.outputs.skip != 'true'
+        id: branch
+        run: |
+          BRANCH="claude/code-sync"
+          git checkout -b "$BRANCH"
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Claude: update project docs
+        if: steps.existing.outputs.skip != 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_args: "--model claude-sonnet-4-6 --max-turns 25 --allowedTools Read,Write,Edit,Glob,Grep,Bash"
+          prompt: |
+            You are a documentation updater for a team docs repository.
+            Read CLAUDE.md for the project index and content conventions.
+
+            Activity data for each registered code repository is in /tmp/code-activity/*.json.
+            Each file contains: merged_prs, releases, and docs_needed issues from the past 7 days.
+
+            Steps:
+            1. Read CLAUDE.md to get the project index and the mapping of repos to folders.
+            2. Read /tmp/code-activity/ to see what happened in each repo.
+            3. For each repo with activity:
+               a. Read the current `projects/<name>/architecture.md` if it exists.
+               b. Read the most recent status file in `projects/<name>/status/` if any exist.
+               c. Determine if any of these need updating:
+                  - architecture.md: significant new features, changed interfaces, removed components
+                  - New status file: if there were multiple merged PRs or a new release
+            4. For each item needing a docs-needed issue from a code repo:
+               Create a GitHub Issue in this docs repo:
+               gh issue create \
+                 --repo ${{ github.repository }} \
+                 --title "docs: <title from code repo issue>" \
+                 --body "Requested in <code-repo-url>
+                 <original issue body>" \
+                 --label "type:task" --label "project:<name>"
+            5. For files you update: only modify files in projects/. Never touch sops/, sync/, or CLAUDE.md.
+            6. If you made no file changes, exit without committing.
+            7. If you made file changes:
+               a. Stage: git add projects/
+               b. Commit: git commit -m "docs: weekly code sync update"
+               c. Push: git push origin ${{ steps.branch.outputs.branch }}
+
+            IMPORTANT:
+            - Only create a status file if there is substantive content (at least 3 merged PRs or a release).
+            - Do not fabricate content. Only write what the activity data supports.
+            - Status files must follow the naming convention: YYYYMMDD_status.md with correct frontmatter.
+            - Architecture updates should be surgical: update the specific section that changed.
+
+      - name: Create PR
+        if: steps.existing.outputs.skip != 'true' && success()
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_WRITE_TOKEN }}
+        run: |
+          if git log origin/main..${{ steps.branch.outputs.branch }} --oneline 2>/dev/null | grep -q .; then
+            gh pr create \
+              --draft \
+              --title "docs: weekly code sync update" \
+              --body "$(cat <<'EOF'
+          ## Summary
+
+          Automated documentation update from weekly code-repos sync.
+
+          Changes are based on merged PRs, releases, and docs-needed issues
+          from registered code repositories in the past 7 days.
+
+          ## Review checklist
+
+          - [ ] Architecture changes accurately reflect the code
+          - [ ] Status summaries are factually correct
+          - [ ] No fabricated or speculative content
+          EOF
+          )" \
+              --head "${{ steps.branch.outputs.branch }}" \
+              --base main
+          else
+            echo "No commits on branch. Nothing to PR."
+          fi

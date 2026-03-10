@@ -1,0 +1,187 @@
+# Project Sync — mirror GitHub Projects v2 board state to sync/projects/.
+#
+# Runs daily at 02:00 UTC and on manual dispatch.
+#
+# Output: sync/projects/<board-slug>.md
+#   A kanban-style markdown snapshot of all project items grouped by status column.
+#
+# Prerequisites:
+#   - ORG_PROJECTS_TOKEN secret: fine-grained PAT with read:org + read:project scopes
+#
+# Note: GitHub's Projects v2 API is GraphQL-only. This workflow uses the gh CLI
+# GraphQL interface. Adjust the project number in CLAUDE.md or pass it as input.
+
+name: Project Sync
+
+on:
+  schedule:
+    - cron: "0 2 * * *"    # Daily 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      project_number:
+        description: "GitHub Projects v2 project number (overrides CLAUDE.md default)"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: project-sync
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.ORG_PROJECTS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Determine project number
+        id: project
+        run: |
+          # Try input first, then CLAUDE.md, then fail loudly
+          if [ -n "${{ github.event.inputs.project_number }}" ]; then
+            echo "number=${{ github.event.inputs.project_number }}" >> $GITHUB_OUTPUT
+          else
+            # Extract from CLAUDE.md: line like "Project board: <number>"
+            num=$(grep -oP '(?<=Project board: )\d+' CLAUDE.md || true)
+            if [ -z "$num" ]; then
+              echo "ERROR: No project number found. Set 'Project board: <number>' in CLAUDE.md or pass project_number input."
+              exit 1
+            fi
+            echo "number=$num" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Fetch project data
+        id: fetch
+        run: |
+          set -euo pipefail
+          ORG=$(echo "${{ github.repository_owner }}")
+          PROJECT_NUMBER="${{ steps.project.outputs.number }}"
+
+          # Query project metadata and items
+          gh api graphql -f query='
+            query($org: String!, $number: Int!) {
+              organization(login: $org) {
+                projectV2(number: $number) {
+                  title
+                  url
+                  items(first: 200) {
+                    nodes {
+                      id
+                      fieldValues(first: 10) {
+                        nodes {
+                          ... on ProjectV2ItemFieldSingleSelectValue {
+                            name
+                            field { ... on ProjectV2SingleSelectField { name } }
+                          }
+                          ... on ProjectV2ItemFieldTextValue {
+                            text
+                            field { ... on ProjectV2Field { name } }
+                          }
+                        }
+                      }
+                      content {
+                        ... on Issue {
+                          number
+                          title
+                          state
+                          url
+                          assignees(first: 3) { nodes { login } }
+                          labels(first: 5) { nodes { name } }
+                        }
+                        ... on PullRequest {
+                          number
+                          title
+                          state
+                          url
+                        }
+                        ... on DraftIssue {
+                          title
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ' -F org="$ORG" -F number="$PROJECT_NUMBER" > /tmp/project_data.json
+
+          echo "Fetched project data."
+
+      - name: Write markdown snapshot
+        run: |
+          set -euo pipefail
+          mkdir -p sync/projects
+
+          PROJECT_TITLE=$(jq -r '.data.organization.projectV2.title' /tmp/project_data.json)
+          PROJECT_URL=$(jq -r '.data.organization.projectV2.url' /tmp/project_data.json)
+          SLUG=$(echo "$PROJECT_TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g')
+          OUTFILE="sync/projects/${SLUG}.md"
+
+          {
+            echo "---"
+            echo "project_board: \"${PROJECT_TITLE}\""
+            echo "url: ${PROJECT_URL}"
+            echo "synced: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+            echo "---"
+            echo ""
+            echo "# ${PROJECT_TITLE}"
+            echo ""
+            echo "*Synced: $(date -u +"%Y-%m-%d %H:%M UTC")*"
+            echo ""
+          } > "$OUTFILE"
+
+          # Group items by Status field value
+          jq -c '.data.organization.projectV2.items.nodes[]' /tmp/project_data.json | while IFS= read -r item; do
+            echo "$item"
+          done | python3 - <<'PYEOF' >> "$OUTFILE"
+          import sys, json
+          from collections import defaultdict
+
+          items = [json.loads(line) for line in sys.stdin if line.strip()]
+          groups = defaultdict(list)
+
+          for item in items:
+            status = "No Status"
+            for fv in item.get("fieldValues", {}).get("nodes", []):
+              if fv.get("field", {}).get("name") == "Status":
+                status = fv.get("name", "No Status")
+                break
+            content = item.get("content") or {}
+            title = content.get("title", "(draft)")
+            number = content.get("number")
+            url = content.get("url", "")
+            state = content.get("state", "").lower()
+            assignees = ", ".join(n["login"] for n in content.get("assignees", {}).get("nodes", []))
+            labels = ", ".join(n["name"] for n in content.get("labels", {}).get("nodes", []))
+            groups[status].append((number, title, url, state, assignees, labels))
+
+          column_order = ["Backlog", "In Progress", "In Review", "Done", "No Status"]
+          for col in column_order + [k for k in groups if k not in column_order]:
+            if col not in groups:
+              continue
+            print(f"\n## {col}\n")
+            print("| # | Title | Assignees | Labels |")
+            print("|---|---|---|---|")
+            for number, title, url, state, assignees, labels in groups[col]:
+              num_str = f"[#{number}]({url})" if number else "--"
+              print(f"| {num_str} | {title} | {assignees or '--'} | {labels or '--'} |")
+          PYEOF
+
+          echo "Wrote $OUTFILE"
+
+      - name: Commit and push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add sync/projects/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: sync project board to markdown"
+            git push
+          fi

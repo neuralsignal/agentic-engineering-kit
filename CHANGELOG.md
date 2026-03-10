@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.0] - 2026-03-10
+
+### Added
+- `skills/docs-manager` -- full skill for running a GitHub-based team docs repository: two-flow model (Issues + Markdown), label taxonomy, Obsidian Templater templates, agentic workflow guide, content routing reference, issue lifecycle reference, code-repo linking reference, and new-project SOP
+- `workflows/issue-sync.yml` -- mirrors GitHub Issues to `sync/issues/` markdown snapshots on label/close events and weekly resync
+- `workflows/project-sync.yml` -- mirrors GitHub Projects v2 board to `sync/projects/` kanban markdown daily via GraphQL API
+- `workflows/docs-review.yml` -- Claude-powered PR review for docs: frontmatter compliance, naming conventions, vault syntax check, required sections
+- `workflows/code-sync-weekly.yml` -- weekly cross-repo sync: fetches merged PRs, releases, and docs-needed issues from registered code repos, opens a draft PR with architecture and status updates
+- `catalog.yaml` entries for `docs-manager`, `wf-issue-sync`, `wf-project-sync`, `wf-docs-review`, `wf-code-sync-weekly`
+
 ## [0.4.0] - 2026-03-10
 
 ### Changed

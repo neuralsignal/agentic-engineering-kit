@@ -1,0 +1,151 @@
+# Issue Sync — mirror GitHub Issues to markdown snapshots in sync/issues/.
+#
+# Triggered on:
+#   - Issue labeled with sync-to-docs (immediate sync of that issue)
+#   - Issue closed (immediate sync)
+#   - Weekly Sunday 03:00 UTC (full resync of all open issues)
+#   - Manual dispatch
+#
+# Output:
+#   sync/issues/open/<number>_<slug>.md
+#   sync/issues/closed/<number>_<slug>.md
+#
+# Prerequisites:
+#   - No extra secrets needed (GITHUB_TOKEN is sufficient for read + push)
+
+name: Issue Sync
+
+on:
+  issues:
+    types: [labeled, closed]
+  schedule:
+    - cron: "0 3 * * 0"    # Weekly Sunday 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: read
+
+concurrency:
+  group: issue-sync
+  cancel-in-progress: false   # queue, don't cancel -- each run may touch different files
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Sync issues to markdown
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
+          LABEL_APPLIED: ${{ github.event.label.name }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p sync/issues/open sync/issues/closed
+
+          slugify() {
+            echo "$1" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-//;s/-$//' | cut -c1-60
+          }
+
+          write_issue_file() {
+            local number="$1"
+            local state="$2"
+
+            local data
+            data=$(gh issue view "$number" --repo "$REPO" \
+              --json number,title,state,labels,assignees,createdAt,updatedAt,url,body)
+
+            local title slug dest_dir dest_file
+            title=$(echo "$data" | jq -r '.title')
+            slug=$(slugify "$title")
+            state_lower=$(echo "$state" | tr '[:upper:]' '[:lower:]')
+
+            if [ "$state_lower" = "closed" ]; then
+              dest_dir="sync/issues/closed"
+              # Remove from open/ if it exists there
+              rm -f sync/issues/open/"${number}"_*.md
+            else
+              dest_dir="sync/issues/open"
+            fi
+
+            dest_file="${dest_dir}/${number}_${slug}.md"
+
+            local labels assignees body
+            labels=$(echo "$data" | jq -r '[.labels[].name] | join(", ")')
+            assignees=$(echo "$data" | jq -r '[.assignees[].login] | join(", ")')
+            body=$(echo "$data" | jq -r '.body // ""')
+            created=$(echo "$data" | jq -r '.createdAt')
+            updated=$(echo "$data" | jq -r '.updatedAt')
+            url=$(echo "$data" | jq -r '.url')
+
+            cat > "$dest_file" <<EOF
+          ---
+          issue: ${number}
+          title: "${title}"
+          state: ${state_lower}
+          labels: [${labels}]
+          assignees: [${assignees}]
+          created: ${created}
+          updated: ${updated}
+          url: ${url}
+          ---
+
+          # ${title}
+
+          ${body}
+
+          ---
+          *Last synced: $(date -u +"%Y-%m-%dT%H:%M:%SZ")*
+          EOF
+
+            echo "Wrote $dest_file"
+          }
+
+          if [ "$EVENT_NAME" = "issues" ] && [ -n "$EVENT_ISSUE_NUMBER" ]; then
+            # Single-issue sync
+            if [ "${{ github.event.action }}" = "closed" ]; then
+              write_issue_file "$EVENT_ISSUE_NUMBER" "closed"
+            elif [ "$LABEL_APPLIED" = "sync-to-docs" ] || [ "${{ github.event.action }}" = "labeled" ]; then
+              state=$(gh issue view "$EVENT_ISSUE_NUMBER" --repo "$REPO" --json state -q '.state')
+              write_issue_file "$EVENT_ISSUE_NUMBER" "$state"
+            fi
+          else
+            # Full resync
+            echo "Running full resync..."
+
+            # Sync all open issues
+            gh issue list --repo "$REPO" --state open --limit 500 --json number,state \
+              | jq -c '.[]' | while IFS= read -r item; do
+                num=$(echo "$item" | jq -r '.number')
+                write_issue_file "$num" "open"
+              done
+
+            # Move any closed issues that are still in open/
+            for f in sync/issues/open/*.md; do
+              [ -e "$f" ] || continue
+              num=$(grep "^issue:" "$f" | awk '{print $2}')
+              state=$(gh issue view "$num" --repo "$REPO" --json state -q '.state' 2>/dev/null || echo "open")
+              if [ "$state" = "CLOSED" ] || [ "$state" = "closed" ]; then
+                write_issue_file "$num" "closed"
+              fi
+            done
+          fi
+
+      - name: Commit and push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add sync/issues/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: sync issues to markdown"
+            git push
+          fi

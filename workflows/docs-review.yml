@@ -1,0 +1,94 @@
+# Docs Review — Claude reviews PRs that touch projects/ or sops/.
+#
+# Checks:
+#   - YAML frontmatter present with required fields for the doc type
+#   - File naming follows conventions (YYYYMMDD_<slug>.md for dated docs)
+#   - No wikilinks or Obsidian vault syntax
+#   - Action Items section present in meeting notes
+#   - Decision records have a status field
+#
+# Prerequisites:
+#   - CLAUDE_CODE_OAUTH_TOKEN secret (run `claude /install-github-app`)
+
+name: Docs Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "projects/**/*.md"
+      - "sops/**/*.md"
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed doc files
+        id: changed
+        run: |
+          BASE=${{ github.event.pull_request.base.sha }}
+          HEAD=${{ github.event.pull_request.head.sha }}
+          CHANGED=$(git diff --name-only "$BASE" "$HEAD" -- 'projects/**/*.md' 'sops/**/*.md' | tr '\n' ' ')
+          echo "files=$CHANGED" >> $GITHUB_OUTPUT
+          echo "Changed docs: $CHANGED"
+
+      - name: Claude docs review
+        if: steps.changed.outputs.files != ''
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_args: "--model claude-haiku-4-5-20251001 --max-turns 15 --allowedTools Read,Bash,Glob,Grep"
+          prompt: |
+            You are a documentation reviewer for a team docs repository.
+            Read CLAUDE.md for the frontmatter schema and naming conventions.
+
+            Review the following changed files in this PR:
+            ${{ steps.changed.outputs.files }}
+
+            For each file, check:
+
+            1. **YAML frontmatter**
+               - Present at the top of the file
+               - Has `type` field matching one of: meeting-note, decision, architecture,
+                 status-update, project-readme
+               - Has `date` field (YYYY-MM-DD)
+               - Has `project` field (kebab-case slug matching a project in CLAUDE.md)
+               - Additional required fields by type:
+                 - meeting-note: `attendees` (list)
+                 - decision: `status` (accepted/superseded/archived)
+
+            2. **File naming** (for files in meetings/, decisions/, status/)
+               - Must match: YYYYMMDD_<slug>.md
+               - Date prefix must match the `date` field in frontmatter
+
+            3. **No vault syntax**
+               - No `[[wikilinks]]`
+               - No `![[embeds]]`
+               - No `> [!note]` callout syntax
+
+            4. **Meeting notes**
+               - Must have an `## Action Items` section
+
+            5. **Decision records**
+               - Must have `## Context`, `## Decision`, and `## Consequences` sections
+
+            Post a single review comment on the PR with your findings.
+            Format: one section per file, with a pass/fail status and specific issues.
+            If all files pass, post a brief "All docs checks passed" comment.
+
+            Use the gh CLI to post your review:
+            gh pr comment ${{ github.event.pull_request.number }} \
+              --repo ${{ github.repository }} \
+              --body-file /tmp/docs-review.md
+
+            Write your review to /tmp/docs-review.md first using the Write tool, then post it.
