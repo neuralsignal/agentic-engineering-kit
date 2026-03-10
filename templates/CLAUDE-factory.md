@@ -54,8 +54,10 @@ When triggered via @claude mention, assess task complexity before acting:
    ```bash
    gh issue create \
      --title "[Part N/M] <specific scope>" \
-     --body "Parent: #<parent-issue>\n\n<self-contained scope>" \
-     --label "claude:implement,type:feat,priority:2"
+     --body $'Parent: #<parent-issue>\n\n<self-contained scope>' \
+     --label "claude:implement" \
+     --label "type:feat" \
+     --label "priority:2"
    ```
 3. The factory pipeline picks each up via `issue-implement.yml`
 
