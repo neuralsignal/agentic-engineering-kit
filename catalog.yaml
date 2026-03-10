@@ -95,6 +95,103 @@ components:
     license: Apache-2.0
     upstream: https://github.com/anthropics/skills/tree/main/skills/skill-creator
 
+  - id: frontend-design
+    type: skill
+    path: skills/frontend-design
+    name: Frontend Design
+    description: >
+      Frontend design aesthetics and UI/UX guidance: typography, color, motion,
+      spatial composition, and component architecture patterns for web interfaces.
+      Covers anti-AI-slop patterns, React 19 notes, and a pre-ship checklist.
+    category: frontend
+    platforms: [generic]
+    dependencies: []
+    install_target: skills
+
+  - id: fastapi-fullstack
+    type: skill
+    path: skills/fastapi-fullstack
+    name: FastAPI Fullstack
+    description: >
+      Scaffold a production-grade FastAPI + React full-stack project from the
+      official FastAPI template. PostgreSQL, JWT auth, Docker Compose, Traefik,
+      and GitHub Actions CI/CD. Includes an init script that clones, renames,
+      and configures the project interactively.
+    category: backend
+    platforms: [generic]
+    dependencies: []
+    install_target: skills
+
+  - id: fastapi-minimal
+    type: skill
+    path: skills/fastapi-minimal
+    name: FastAPI Minimal
+    description: >
+      Scaffold a minimal async FastAPI + SQLModel project with SQLite, Alembic
+      migrations, pydantic-settings config, and pytest-asyncio tests. No Docker
+      required. Upgradeable to PostgreSQL by swapping the DATABASE_URL.
+    category: backend
+    platforms: [generic]
+    dependencies: []
+    install_target: skills
+
+  - id: web-artifacts-builder
+    type: skill
+    path: skills/web-artifacts-builder
+    name: Web Artifacts Builder
+    description: >
+      Build complex React artifacts (React + TypeScript + Tailwind CSS 3 +
+      shadcn/ui, 40+ components pre-installed) and bundle them to a single
+      self-contained HTML file for display in conversation. Includes init
+      and bundle scripts.
+    category: frontend
+    platforms: [generic]
+    dependencies: [frontend-design]
+    install_target: skills
+
+  - id: markdown-convert
+    type: skill
+    path: skills/markdown-convert
+    name: Markdown Convert
+    description: >
+      Convert Markdown files to PDF or DOCX, stripping Obsidian-specific
+      syntax (wikilinks, embeds, callouts, Relations section) before export.
+      Powered by the obsidian-export PyPI library. Supports Mermaid diagram
+      rendering and custom LaTeX brand profiles.
+    category: documentation
+    platforms: [generic]
+    dependencies: []
+    install_target: skills
+
+  # --- Agents ---
+
+  - id: engineering-reviewer
+    type: agent
+    path: agents/engineering-reviewer.md
+    name: Engineering Reviewer
+    description: >
+      Read-only compliance reviewer that audits code against the 11 engineering
+      principles and produces a structured report with PASS/VIOLATIONS/SUMMARY
+      sections and CLEAN/MINOR/MAJOR/CRITICAL severity ratings.
+    category: quality
+    platforms: [generic]
+    dependencies: [engineering-principles]
+    install_target: agents
+
+  - id: software-engineer
+    type: agent
+    path: agents/software-engineer.md
+    name: Software Engineer
+    description: >
+      Senior software engineer agent for coding-heavy tasks: new Python packages,
+      multi-file refactors, TDD cycles, CLI tools, and debugging. Enforces the
+      11 engineering principles inline. Supports FastAPI, web artifacts, and
+      general Python development.
+    category: engineering
+    platforms: [generic]
+    dependencies: [engineering-principles]
+    install_target: agents
+
   # --- Rules ---
 
   - id: engineering-principles

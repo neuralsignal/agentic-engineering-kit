@@ -2,7 +2,10 @@
 
 Agents are autonomous, narrowly-scoped AI subagents that can be invoked by the parent agent to handle specific tasks. Each agent runs in an isolated context with its own system prompt and tool restrictions.
 
-This directory is currently empty. Future releases will add general-purpose agents for common engineering tasks (e.g., code review, documentation audit).
+| Agent | Description |
+|-------|-------------|
+| `engineering-reviewer.md` | Read-only compliance reviewer. Audits code against the 11 engineering principles and produces a structured PASS/VIOLATIONS/SUMMARY report. |
+| `software-engineer.md` | Senior software engineer for coding-heavy tasks: new packages, multi-file refactors, TDD cycles, CLI tools. Enforces all engineering principles inline. |
 
 ## How Agents Work
 
