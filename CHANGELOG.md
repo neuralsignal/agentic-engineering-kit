@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0] - 2026-03-10
+
+### Changed
+- `workflows/claude-mention.yml` — upgraded to claude-opus-4-6, max-turns 100, full Bash access, FACTORY_PAT for sub-issue cascade
+- `workflows/issue-implement.yml` — max-turns increased from 50 to 100
+- `workflows/pr-autofix.yml` — upgraded to claude-opus-4-6, max-turns increased from 30 to 100
+
+### Added
+- Sub-issue decomposition guidance in `templates/CLAUDE-factory.md` — @claude can now break complex tasks into sequentially-handled sub-issues using the existing factory pipeline
+
 ## [0.3.0] - 2026-03-09
 
 ### Added

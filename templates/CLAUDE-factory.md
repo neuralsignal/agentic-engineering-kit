@@ -33,6 +33,34 @@ Fill in the placeholders (`<...>`) with project-specific values.
 | `source:docs-freshness` | Created by docs freshness agent |
 | `source:workflow-upgrade` | Created by workflow upgrade agent |
 
+### Sub-Issue Decomposition (@claude)
+
+When triggered via @claude mention, assess task complexity before acting:
+
+**Handle directly** (single Claude run):
+- Questions and explanations
+- Small targeted fixes (1-3 files)
+- Code review feedback
+- Anything completable in <20 turns
+
+**Decompose into sub-issues** (complex multi-part tasks):
+- Tasks spanning multiple independent modules
+- Plans with 3+ clearly separable deliverables
+- Requests like "execute the plan and create a PR" on large features
+
+**Decomposition pattern:**
+1. Write a brief analysis comment outlining the sub-tasks
+2. Create one GitHub issue per sub-task:
+   ```bash
+   gh issue create \
+     --title "[Part N/M] <specific scope>" \
+     --body "Parent: #<parent-issue>\n\n<self-contained scope>" \
+     --label "claude:implement,type:feat,priority:2"
+   ```
+3. The factory pipeline picks each up via `issue-implement.yml`
+
+Each sub-issue must be **self-contained** — no shared state assumptions with sibling issues.
+
 ### Build & Test
 
 - Package manager: `<pixi|pip|npm|cargo|...>`
