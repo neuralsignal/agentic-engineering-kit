@@ -1,0 +1,16 @@
+[workspace]
+channels = ["conda-forge"]
+name = "academic-research"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[dependencies]
+python = ">=3.12,<3.15"
+
+[pypi-dependencies]
+pyyaml = ">=6,<7"
+pyzotero = ">=1.5.0,<2"
+biopython = ">=1.84,<2"
+requests = ">=2.31,<3"
+pypdf = ">=4.0,<5"
+pytest = ">=8,<9"

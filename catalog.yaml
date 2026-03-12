@@ -163,6 +163,19 @@ components:
     dependencies: []
     install_target: skills
 
+  - id: academic-research
+    type: skill
+    path: skills/academic-research
+    name: Academic Research
+    description: >
+      Scripts for academic literature review — search PubMed, Semantic Scholar,
+      and Zotero; scaffold paper knowledge notes from metadata JSON; download
+      and extract PDFs; export BibTeX from existing paper notes.
+    category: research
+    platforms: [generic]
+    dependencies: []
+    install_target: skills
+
   # --- Agents ---
 
   - id: engineering-reviewer
@@ -190,6 +203,19 @@ components:
     category: engineering
     platforms: [generic]
     dependencies: [engineering-principles]
+    install_target: agents
+
+  - id: literature-researcher
+    type: agent
+    path: agents/literature-researcher.md
+    name: Literature Researcher
+    description: >
+      Academic literature review agent — quick scan or deep dive on any
+      research topic. Uses Python scripts for PubMed, Semantic Scholar,
+      and Zotero search plus native WebSearch/WebFetch.
+    category: research
+    platforms: [generic]
+    dependencies: [academic-research]
     install_target: agents
 
   # --- Rules ---
