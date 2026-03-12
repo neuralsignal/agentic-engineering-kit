@@ -1,0 +1,49 @@
+model_type: comparison
+title: "Competitive Comparison"
+currency: EUR
+granularity: auto
+start_period: "2025"
+n_periods: 0
+n_history_periods: 0
+
+entities:
+  - key: company_a
+    label: Company A
+  - key: company_b
+    label: Company B
+  - key: company_c
+    label: Company C
+
+line_items:
+  - key: revenue
+    label: Revenue (EUR M)
+    formula_type: constant
+    formula_params:
+      value: 0
+    section: Financials
+
+  - key: ebitda
+    label: EBITDA (EUR M)
+    formula_type: constant
+    formula_params:
+      value: 0
+    section: Financials
+
+  - key: ebitda_margin
+    label: EBITDA Margin
+    formula_type: ratio
+    formula_params:
+      numerator_key: ebitda
+      denominator_key: revenue
+    section: Efficiency
+
+  - key: revenue_rank
+    label: Revenue Rank
+    formula_type: rank
+    formula_params:
+      value_key: revenue
+    section: Rankings
+
+inputs:
+  source: ""
+  period_col: period

@@ -1,0 +1,142 @@
+model_type: p_and_l
+title: "Profit & Loss Statement"
+currency: USD
+granularity: annual
+start_period: "2025"
+n_periods: 3
+n_history_periods: 2
+
+metadata:
+  preparer: ""
+  date: ""
+  version: "1.0"
+
+assumptions:
+  - name: RevenueGrowthRate
+    label: Revenue Growth Rate
+    value: 0.10
+    format: percent
+    group: Growth
+
+  - name: COGSMargin
+    label: COGS % of Revenue
+    value: 0.45
+    format: percent
+    group: Margins
+
+  - name: OpExGrowthRate
+    label: OpEx Growth Rate
+    value: 0.05
+    format: percent
+    group: Growth
+
+  - name: TaxRate
+    label: Effective Tax Rate
+    value: 0.21
+    format: percent
+    group: Tax
+
+  - name: DARate
+    label: D&A % of Revenue
+    value: 0.03
+    format: percent
+    group: Margins
+
+line_items:
+  - key: revenue
+    label: Revenue
+    formula_type: input_ref
+    formula_params:
+      projected_type: growth_projected
+      growth_assumption: RevenueGrowthRate
+    section: Revenue
+
+  - key: cogs
+    label: "  Cost of Goods Sold"
+    formula_type: pct_of_revenue
+    formula_params:
+      revenue_key: revenue
+      rate_assumption: COGSMargin
+    section: Cost
+
+  - key: gross_profit
+    label: Gross Profit
+    formula_type: subtraction
+    formula_params:
+      minuend_key: revenue
+      subtrahend_key: cogs
+    is_subtotal: true
+    section: Profit
+
+  - key: opex
+    label: "  Operating Expenses"
+    formula_type: input_ref
+    formula_params:
+      projected_type: growth_projected
+      growth_assumption: OpExGrowthRate
+    section: OpEx
+
+  - key: da
+    label: "  Depreciation & Amortization"
+    formula_type: pct_of_revenue
+    formula_params:
+      revenue_key: revenue
+      rate_assumption: DARate
+    section: OpEx
+
+  - key: ebitda
+    label: EBITDA
+    formula_type: subtraction
+    formula_params:
+      minuend_key: gross_profit
+      subtrahend_key: opex
+    is_subtotal: true
+    section: Profit
+
+  - key: ebit
+    label: EBIT
+    formula_type: subtraction
+    formula_params:
+      minuend_key: ebitda
+      subtrahend_key: da
+    is_subtotal: true
+    section: Profit
+
+  - key: interest
+    label: "  Interest Expense"
+    formula_type: constant
+    formula_params:
+      value: 0
+    section: Finance
+
+  - key: ebt
+    label: Earnings Before Tax
+    formula_type: subtraction
+    formula_params:
+      minuend_key: ebit
+      subtrahend_key: interest
+    section: Profit
+
+  - key: tax
+    label: "  Income Tax"
+    formula_type: pct_of_revenue
+    formula_params:
+      revenue_key: ebt
+      rate_assumption: TaxRate
+    section: Tax
+
+  - key: net_income
+    label: Net Income
+    formula_type: subtraction
+    formula_params:
+      minuend_key: ebt
+      subtrahend_key: tax
+    is_total: true
+    section: Profit
+
+inputs:
+  source: ""
+  period_col: period
+  value_cols:
+    revenue: revenue
+    opex: opex

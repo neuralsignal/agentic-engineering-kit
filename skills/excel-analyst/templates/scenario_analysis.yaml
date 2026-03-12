@@ -1,0 +1,72 @@
+model_type: scenario
+title: "Scenario Analysis"
+currency: USD
+granularity: annual
+start_period: "2025"
+n_periods: 3
+n_history_periods: 2
+
+metadata:
+  preparer: ""
+  date: ""
+  version: "1.0"
+
+scenarios:
+  - name: base
+    label: Base Case
+
+  - name: bull
+    label: Bull Case
+    assumption_overrides:
+      RevenueGrowthRate: 0.20
+      COGSMargin: 0.40
+
+  - name: bear
+    label: Bear Case
+    assumption_overrides:
+      RevenueGrowthRate: 0.02
+      COGSMargin: 0.52
+
+assumptions:
+  - name: RevenueGrowthRate
+    label: Revenue Growth Rate (Base)
+    value: 0.10
+    format: percent
+    group: Growth
+
+  - name: COGSMargin
+    label: COGS % of Revenue (Base)
+    value: 0.45
+    format: percent
+    group: Margins
+
+line_items:
+  - key: revenue
+    label: Revenue
+    formula_type: growth_projected
+    formula_params:
+      growth_assumption: RevenueGrowthRate
+    section: Revenue
+
+  - key: cogs
+    label: "  Cost of Goods Sold"
+    formula_type: pct_of_revenue
+    formula_params:
+      revenue_key: revenue
+      rate_assumption: COGSMargin
+    section: Cost
+
+  - key: gross_profit
+    label: Gross Profit
+    formula_type: subtraction
+    formula_params:
+      minuend_key: revenue
+      subtrahend_key: cogs
+    is_subtotal: true
+    section: Profit
+
+inputs:
+  source: ""
+  period_col: period
+  value_cols:
+    revenue: revenue

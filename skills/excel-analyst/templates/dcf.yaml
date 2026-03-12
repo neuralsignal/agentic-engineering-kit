@@ -1,0 +1,157 @@
+model_type: dcf
+title: "Discounted Cash Flow Model"
+currency: USD
+granularity: annual
+start_period: "2025"
+n_periods: 5
+n_history_periods: 2
+
+metadata:
+  preparer: ""
+  date: ""
+  version: "1.0"
+
+assumptions:
+  - name: RevenueGrowthRate
+    label: Revenue Growth Rate
+    value: 0.10
+    format: percent
+    group: Growth
+
+  - name: EBITDAMargin
+    label: EBITDA Margin
+    value: 0.20
+    format: percent
+    group: Margins
+
+  - name: TaxRate
+    label: Tax Rate
+    value: 0.21
+    format: percent
+    group: Tax
+
+  - name: CapExRate
+    label: CapEx % of Revenue
+    value: 0.05
+    format: percent
+    group: Investment
+
+  - name: NWCChangeRate
+    label: NWC Change % of Revenue
+    value: 0.02
+    format: percent
+    group: Investment
+
+  - name: WACC
+    label: Discount Rate (WACC)
+    value: 0.10
+    format: percent
+    group: Valuation
+
+  - name: TGR
+    label: Terminal Growth Rate
+    value: 0.02
+    format: percent
+    group: Valuation
+
+line_items:
+  - key: revenue
+    label: Revenue
+    formula_type: input_ref
+    formula_params:
+      projected_type: growth_projected
+      growth_assumption: RevenueGrowthRate
+    section: Income
+
+  - key: ebitda
+    label: EBITDA
+    formula_type: pct_of_revenue
+    formula_params:
+      revenue_key: revenue
+      rate_assumption: EBITDAMargin
+    is_subtotal: true
+    section: Income
+
+  - key: tax_adj
+    label: "  Taxes (adjusted)"
+    formula_type: pct_of_revenue
+    formula_params:
+      revenue_key: ebitda
+      rate_assumption: TaxRate
+    section: Tax
+
+  - key: nopat
+    label: NOPAT
+    formula_type: subtraction
+    formula_params:
+      minuend_key: ebitda
+      subtrahend_key: tax_adj
+    is_subtotal: true
+    section: FCF
+
+  - key: capex
+    label: "  Capital Expenditures"
+    formula_type: pct_of_revenue
+    formula_params:
+      revenue_key: revenue
+      rate_assumption: CapExRate
+    section: FCF
+
+  - key: nwc_change
+    label: "  Change in NWC"
+    formula_type: pct_of_revenue
+    formula_params:
+      revenue_key: revenue
+      rate_assumption: NWCChangeRate
+    section: FCF
+
+  - key: fcf
+    label: Free Cash Flow
+    formula_type: sum_subtraction
+    formula_params:
+      addend_key: nopat
+      subtrahend_keys:
+        - capex
+        - nwc_change
+    is_subtotal: true
+    section: FCF
+
+  - key: pv_fcf
+    label: PV of FCF
+    formula_type: discounted_pv
+    formula_params:
+      cashflow_key: fcf
+      rate_assumption: WACC
+    section: Valuation
+
+  - key: terminal_value
+    label: Terminal Value
+    formula_type: terminal_value
+    formula_params:
+      cashflow_key: fcf
+      growth_assumption: TGR
+      rate_assumption: WACC
+    section: Valuation
+
+  - key: pv_terminal
+    label: PV of Terminal Value
+    formula_type: discounted_pv
+    formula_params:
+      cashflow_key: terminal_value
+      rate_assumption: WACC
+    section: Valuation
+
+  - key: enterprise_value
+    label: Enterprise Value
+    formula_type: npv_sum
+    formula_params:
+      pv_fcf_key: pv_fcf
+      pv_terminal_key: pv_terminal
+    is_total: true
+    section: Valuation
+
+inputs:
+  source: ""
+  period_col: period
+  value_cols:
+    revenue: revenue

@@ -1,0 +1,20 @@
+model_type: custom
+title: "Custom Financial Model"
+currency: USD
+granularity: annual
+start_period: "2025"
+n_periods: 3
+n_history_periods: 0
+
+metadata:
+  preparer: ""
+  date: ""
+  version: "1.0"
+
+assumptions: []
+line_items: []
+
+inputs:
+  source: ""
+  period_col: period
+  value_cols: {}

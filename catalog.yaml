@@ -163,6 +163,20 @@ components:
     dependencies: []
     install_target: skills
 
+  - id: excel-analyst
+    type: skill
+    path: skills/excel-analyst
+    name: Excel Analyst
+    description: >
+      Build professional Excel financial models (P&L, DCF, Budget vs Actuals,
+      Scenario Analysis) from declarative YAML specs. Generates .xlsx workbooks
+      with named ranges, styled sheets, and Excel formulas via the excel-model
+      PyPI package.
+    category: data-ml
+    platforms: [generic]
+    dependencies: []
+    install_target: skills
+
   - id: academic-research
     type: skill
     path: skills/academic-research

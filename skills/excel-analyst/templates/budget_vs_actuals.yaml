@@ -1,0 +1,89 @@
+model_type: budget_vs_actuals
+title: "Budget vs. Actuals"
+currency: USD
+granularity: monthly
+start_period: "2025-01"
+n_periods: 12
+n_history_periods: 0
+
+metadata:
+  preparer: ""
+  date: ""
+  version: "1.0"
+
+column_groups:
+  - key: plan
+    label: Plan
+    color_hex: "D6E4F0"
+
+  - key: actual
+    label: Actual
+    color_hex: "FDFEFE"
+
+  - key: variance
+    label: Variance
+    color_hex: "FEF9E7"
+
+line_items:
+  - key: revenue_plan
+    label: "  Revenue (Plan)"
+    formula_type: constant
+    formula_params:
+      value: 0
+    section: Revenue
+
+  - key: revenue_actual
+    label: "  Revenue (Actual)"
+    formula_type: constant
+    formula_params:
+      value: 0
+    section: Revenue
+
+  - key: revenue
+    label: Revenue Variance
+    formula_type: variance
+    formula_params:
+      plan_key: revenue_plan
+      actual_key: revenue_actual
+    is_subtotal: true
+    section: Revenue
+
+  - key: cogs_plan
+    label: "  COGS (Plan)"
+    formula_type: constant
+    formula_params:
+      value: 0
+    section: Cost
+
+  - key: cogs_actual
+    label: "  COGS (Actual)"
+    formula_type: constant
+    formula_params:
+      value: 0
+    section: Cost
+
+  - key: cogs
+    label: COGS Variance
+    formula_type: variance
+    formula_params:
+      plan_key: cogs_plan
+      actual_key: cogs_actual
+    section: Cost
+
+  - key: gross_profit
+    label: Gross Profit Variance
+    formula_type: subtraction
+    formula_params:
+      minuend_key: revenue
+      subtrahend_key: cogs
+    is_subtotal: true
+    section: Profit
+
+inputs:
+  source: ""
+  period_col: period
+  value_cols:
+    revenue_plan: revenue_plan
+    revenue_actual: revenue_actual
+    cogs_plan: cogs_plan
+    cogs_actual: cogs_actual
