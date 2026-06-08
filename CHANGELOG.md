@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.0] - 2026-06-08
+
+### Added
+- `scripts/validate_skills.py` — a dependency-light validator enforcing the [agentskills.io specification](https://agentskills.io/specification): `name` regex + directory-name match, `description` length, and optional-field types (`license`, `compatibility`, `metadata`, `allowed-tools`); warns when a `SKILL.md` exceeds 500 lines. Run with `python scripts/validate_skills.py --skills-dir skills`.
+- `scripts/test_validate_skills.py` — pytest + hypothesis unit tests for the validator (name regex, frontmatter parsing, field validation).
+- `.github/workflows/skills-validate.yml` — CI workflow that unit-tests the validator and validates every `skills/*/SKILL.md` on each push/PR touching a skill. The kit is now self-validating against the standard.
+
+### Changed
+- `skills/github-actions/SKILL.md` — split from ~1090 lines into a concise index plus `references/` files, per the spec's <500-line progressive-disclosure guideline. No content lost.
+
 ## [0.5.0] - 2026-03-10
 
 ### Added

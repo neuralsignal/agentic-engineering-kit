@@ -1,0 +1,32 @@
+name: Validate Skills
+
+# Validates every skills/*/SKILL.md against the agentskills.io specification
+# (https://agentskills.io/specification) on each push/PR that touches a skill.
+
+on:
+  push:
+    paths:
+      - "skills/**"
+      - "scripts/validate_skills.py"
+      - "scripts/test_validate_skills.py"
+      - ".github/workflows/skills-validate.yml"
+  pull_request:
+    paths:
+      - "skills/**"
+      - "scripts/validate_skills.py"
+      - "scripts/test_validate_skills.py"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install "pyyaml>=6,<7" "pytest>=8,<9" "hypothesis>=6,<7"
+      - name: Unit-test the validator
+        run: pytest scripts/test_validate_skills.py -q
+      - name: Validate all skills
+        run: python scripts/validate_skills.py --skills-dir skills
