@@ -66,12 +66,6 @@ Offer weekly audit workflows (`wf-dep-audit`, `wf-security-scan`, `wf-code-quali
 | `source-citations` | Citation conventions for external claims |
 | `mermaid-obsidian` | Mermaid diagram compatibility (if using Obsidian) |
 
-### Multi-session agent work
-
-| Component | Why |
-|-----------|-----|
-| `memory-trace-protocol` | Cross-session continuity via memory traces |
-
 ### Teams and shared repos
 
 | Component | Why |

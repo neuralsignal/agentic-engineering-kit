@@ -13,7 +13,6 @@ Rules are markdown files with YAML frontmatter that provide always-available or 
 | [workspace-portability](workspace-portability.md) | core | yes | No hardcoded paths, config-derived roots, relative path resolution |
 | [no-implicit-assumptions](no-implicit-assumptions.md) | agentic | yes | Never attribute ownership without explicit confirmation |
 | [source-citations](source-citations.md) | documentation | yes | Citation conventions for external claims in knowledge docs |
-| [memory-trace-protocol](memory-trace-protocol.md) | agentic | yes | Append-only session memory traces for cross-session continuity |
 | [git-submodules](git-submodules.md) | git | no | Decision framework and commands for git submodules |
 | [mermaid-obsidian](mermaid-obsidian.md) | documentation | yes | Mermaid diagram conventions for Obsidian compatibility |
 

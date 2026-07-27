@@ -318,18 +318,6 @@ components:
     dependencies: []
     install_target: rules
 
-  - id: memory-trace-protocol
-    type: rule
-    path: rules/memory-trace-protocol.md
-    name: Memory Trace Protocol
-    description: >
-      Append-only session memory traces to memory.md for cross-session
-      continuity. When to write, format, and integration with task lifecycle.
-    category: agentic
-    platforms: [generic]
-    dependencies: []
-    install_target: rules
-
   - id: git-submodules
     type: rule
     path: rules/git-submodules.md
