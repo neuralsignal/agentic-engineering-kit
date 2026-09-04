@@ -6,11 +6,11 @@ Rules are markdown files with YAML frontmatter that provide always-available or 
 
 | Rule | Category | Always Apply | Description |
 |------|----------|:------------:|-------------|
-| [engineering-principles](engineering-principles.md) | core | yes | Non-negotiable engineering principles: KISS, DRY, no defaults, fail fast, config-driven, TDD |
+| [engineering-principles](engineering-principles.md) | core | yes | Non-negotiable engineering principles: Intent-First, KISS, YAGNI, DRY, no defaults, fail fast, config-driven |
 | [planning-protocol](planning-protocol.md) | planning | yes | Task assessment, structured questions, scope validation, re-planning triggers |
 | [data-ml-principles](data-ml-principles.md) | data-ml | yes | Notebooks vs source, experiment provenance, feature hygiene, pipeline testing, monitoring |
 | [git-commit-conventions](git-commit-conventions.md) | git | yes | Commit format, staging rules, branch naming |
-| [workspace-portability](workspace-portability.md) | core | yes | No hardcoded paths, config-derived roots, relative path resolution |
+| [workspace-portability](workspace-portability.md) | core | yes | No hardcoded paths, config-derived roots, relative path resolution, the moved-environment gotcha |
 | [no-implicit-assumptions](no-implicit-assumptions.md) | agentic | yes | Never attribute ownership without explicit confirmation |
 | [source-citations](source-citations.md) | documentation | yes | Citation conventions for external claims in knowledge docs |
 | [git-submodules](git-submodules.md) | git | no | Decision framework and commands for git submodules |
@@ -20,6 +20,7 @@ Rules are markdown files with YAML frontmatter that provide always-available or 
 
 - **Always-apply rules** are loaded every session, regardless of which files are open.
 - **File-scoped rules** are loaded only when files matching a glob pattern are open or being edited.
+- **`references/`** holds lookup material with no frontmatter, so it never auto-loads. A rule links to it in one line. Always-loaded rules are a context budget — see [templates/new-rule.md](../templates/new-rule.md).
 - Rules are auto-discovered from this directory via platform symlinks (`.<platform-name>/rules/`) and the `.agents/rules/` cross-client convention.
 
 ## Creating a New Rule

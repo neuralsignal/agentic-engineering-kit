@@ -71,3 +71,9 @@ A model that passes offline evaluation and degrades silently in production is wo
 - **Offline-online metric comparison** -- Regularly compare offline evaluation metrics against observed production outcomes. A growing gap between offline and online performance signals training-serving skew.
 - **Data freshness checks** -- Set staleness thresholds for all upstream data sources. If a table that should refresh daily is 3 days old, the pipeline should fail or alert -- not silently serve stale predictions.
 - **Shadow scoring** -- When deploying a new model version, run it in shadow mode alongside the production model and compare outputs before switching traffic.
+
+## Further Reading
+
+- Google: [Rules of Machine Learning](https://developers.google.com/machine-learning/guides/rules-of-ml) -- 43 battle-tested rules from Google's ML practice.
+- DrivenData: [10 Rules of Reliable Data Science](https://www.drivendata.co/) -- engineering discipline for exploratory data workflows.
+- Sculley et al: [Machine Learning: The High Interest Credit Card of Technical Debt](https://research.google.com/pubs/pub43146.html) -- the canonical paper on ML systems debt.

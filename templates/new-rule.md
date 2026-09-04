@@ -59,9 +59,31 @@ paths:
 | `globs` | Cursor | string | File pattern for auto-attachment |
 | `paths` | Claude Code | list | File patterns for conditional loading |
 
+## `rules/references/` -- the non-loaded tier
+
+Rules are a **context budget**. Every `alwaysApply: true` rule without a `paths:` field loads into
+every agent session, for every agent. A rule earns that only if an agent could plausibly violate it
+in any session.
+
+Everything else is reference material and belongs in one of three places:
+
+| Destination | For | Loaded when |
+|---|---|---|
+| `paths:` on the rule itself | content tied to a directory (`src/api/**`) | files in that path are touched |
+| `rules/references/<name>.md` | lookup tables one agent consults (command tables, migration roadmaps, tool operating guides) | an agent reads it explicitly |
+| `docs/` or `setup/` | human provisioning docs (editor config, shell escaping) | a human sets up a machine |
+
+Files in `rules/references/` carry **no frontmatter**, so they never auto-load. The parent rule
+links to one in a single line.
+
+The split is not prose-cutting. Move the *lookup* material -- the table an agent consults at the
+moment it acts, which it has to open anyway to do the work -- and keep loaded the *guardrail* whose
+violation would be silent or costly. Applied to this kit's own workspace, that cut the always-loaded
+budget by a third with no fact removed.
+
 ## Content Guidelines
 
-- Keep rules under 500 lines. Shorter is better -- agents deprioritize bloated rule files.
+- Keep an always-loaded rule under 60 lines; a path-scoped rule under 500. Agents deprioritize bloated rule files.
 - One concern per rule file. Do not create monolithic rule files covering multiple topics.
 - Use descriptive, kebab-case filenames (e.g., `git-commit-conventions.md`, `data-validation.md`).
 - Write actionable instructions, not aspirational guidelines. "Do X" is better than "Consider doing X."

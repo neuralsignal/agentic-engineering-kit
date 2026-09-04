@@ -5,55 +5,39 @@ alwaysApply: true
 
 # Git Commit Conventions
 
-## Commit Message Format
-
-Use type-prefix + imperative subject. Keep the subject under ~50 characters.
+Type-prefix + imperative subject, under ~50 characters. Optional body explains WHY, wrapped at 72.
 
 ```
 <type>: <short imperative summary>
 
-[optional body: explain WHY, wrap at 72 chars]
+[optional body]
 ```
 
-Valid types:
+| Type | When to use | Example |
+|------|-------------|---------|
+| `feat` | New feature or capability | `feat: add vector sync to the data pipeline` |
+| `fix` | Bug fix | `fix: handle missing API key in auth module` |
+| `docs` | Rules, README, architecture docs | `docs: expand git-commit-conventions rule` |
+| `chore` | Deps, config, lock files, `.gitignore` | `chore: update lock file after adding hypothesis` |
+| `refactor` | Code restructuring without behavior change | `refactor: rename src package to data_pipeline` |
+| `test` | Adding or fixing tests | `test: add property tests for chunk splitter` |
 
-| Type | When to use |
-|------|-------------|
-| `feat` | New feature or capability |
-| `fix` | Bug fix |
-| `docs` | Documentation, rules, README changes |
-| `chore` | Deps, config, lock files, `.gitignore` |
-| `refactor` | Code restructuring without behavior change |
-| `test` | Adding or fixing tests |
+## What to Stage
 
-Examples:
-
-```
-feat: add vector sync to data pipeline
-chore: update lock file after adding hypothesis
-docs: expand git-commit-conventions rule
-fix: handle missing API key in auth module
-refactor: rename src package to data_pipeline
-test: add property tests for chunk splitter
-```
-
-## What to Stage (and What Not To)
-
-**Commit:**
-- All source code (`*.py`, `*.ts`, `*.toml`, `*.yaml`, `*.md`)
-- Lock files (`pixi.lock`, `uv.lock`, `poetry.lock`, `package-lock.json`) for deterministic builds
-- Documentation, rules, skills, agents, templates
-- Config templates (without secrets)
+**Commit:** all source code (`*.py`, `*.ts`, `*.toml`, `*.yaml`, `*.md`); lock files (`pixi.lock`, `uv.lock`, `poetry.lock`, `package-lock.json`) for deterministic builds; documentation, rules, skills, agents, templates; config templates without secrets.
 
 **Never commit:**
-- Virtual environments (`.venv/`, `node_modules/`, `.pixi/`)
-- Database files (`*.db`, `*.sqlite`)
-- `.env` files containing secrets
-- Runtime output (`logs/`, `state/`, `dist/`, `build/`)
-- Machine-specific IDE config (`.vscode/settings.json`, `.idea/`)
-- Large data files or model artifacts
+
+| Path | Why |
+|---|---|
+| `.venv/`, `node_modules/`, `.pixi/` | auto-generated environments |
+| `*.db`, `*.sqlite` | derived indexes, regenerated at runtime |
+| `.env` | secrets |
+| `logs/`, `state/`, `dist/`, `build/` | runtime output |
+| `.vscode/settings.json`, `.idea/` | machine-specific IDE config |
+| large data files, model artifacts | belong in data versioning or object storage |
+| data files riding inside a docs or notes folder (CSV exports, image sets) | `.gitignore` rules are path-based and do NOT follow a moved directory — re-check the ignore after any folder move |
 
 ## Branch Conventions
 
-- **`main`**: Primary branch. Day-to-day work commits directly here in personal/small-team repos.
-- **Feature branches**: `kebab-case-description` for exploratory or PR-based work. Delete after merge.
+`main` is the primary branch; day-to-day work commits directly here in personal or small-team repos. Feature branches are `kebab-case-description` for exploratory or PR-based work — delete after merge.

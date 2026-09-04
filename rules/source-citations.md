@@ -1,63 +1,30 @@
 ---
-description: Source citation conventions for knowledge docs and notes
+description: Citation conventions for external claims in knowledge docs
 alwaysApply: true
 ---
 
 # Source Citations
 
-Rules for citing external sources in knowledge base documents.
-
-## Inline Citations
-
-For any external pricing number, capability claim, or vendor assessment, add an inline hyperlink immediately after the claim:
+Cite external sources inline, immediately after the claim, in the compact form `([source](URL))`:
 
 ```markdown
-Glean minimum is ~$60K/year ([source](https://docs.glean.com/...))
+Vendor X's minimum is ~$60K/year ([source](https://docs.example.com/pricing))
 ```
 
-Use the format `([source](URL))` for a compact inline citation.
+Where no exact vendor page exists, say so in the citation: `estimated ~€20–50/user/month (SME segment); no public pricing page as of 2026-03`.
 
-## Sources Section
+For claims resting on another note, link internally instead — `Per [[vendor-landscape]], …` or `Per [vendor landscape](notes/vendor-landscape.md), …`.
 
-Any document with 3 or more external references must have a `## Sources` section at the bottom (or immediately before a Relations section if one exists).
+A document with 3 or more external references also needs a `## Sources` section at the bottom (or immediately before a Relations section, if one exists), one bullet per source:
 
-Format:
 ```markdown
 ## Sources
 
 - [Brief description of what the source covers](URL)
-- [Brief description](URL)
 ```
 
-When exact vendor pricing pages are unavailable, note estimates explicitly:
-```markdown
-- top.legal pricing: estimated ~€20–50/user/month (DACH SME segment); no public pricing page as of 2026-03
-```
+**Cite:** pricing numbers (per-user costs, annual minimums, infra costs) · capability claims ("covers all data sources", "cloud-only") · data residency statements (which cloud, which region) · tool assessments in ADRs and vendor landscape docs · architecture decision rationale that cites external facts.
 
-## Internal Sources
+**Do not cite:** internal architecture decisions derived from analysis (state the reasoning instead) · facts already well-established in the doc's own analysis · phase plan dates and cost estimates derived from internal decisions.
 
-For claims based on other notes in the knowledge base, use either a wikilink or a standard markdown link:
-
-```markdown
-Per [[vendor-landscape]], Glean costs ~$60K/year minimum.
-Per [vendor landscape](notes/vendor-landscape.md), Glean costs ~$60K/year minimum.
-```
-
-## Scope
-
-Apply to:
-- Pricing numbers (per-user costs, annual minimums, infra costs)
-- Capability claims ("covers all data sources", "cloud-only")
-- Data residency statements (which cloud, which region)
-- Tool assessments in ADRs and vendor landscape docs
-- Architecture decision rationale that cites external facts
-
-## Existing Docs
-
-Backfill source citations at the next substantive edit of an existing document. New documents: apply from creation.
-
-## What NOT to Cite
-
-- Internal architecture decisions derived from analysis (no source needed — state the reasoning)
-- Facts already well-established in the doc's own analysis
-- Phase plan dates and cost estimates derived from internal decisions
+New documents apply this from creation; existing ones are backfilled at their next substantive edit.
