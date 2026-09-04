@@ -5,57 +5,19 @@ alwaysApply: true
 
 # Mermaid Obsidian Conventions
 
-Rules for writing Mermaid diagrams that render correctly in Obsidian.
-
-## Line Breaks in Node Labels
-
-**Never use `\n` or `<br/>` inside node labels.** Both render as literal text in Obsidian.
-
-Use an actual newline inside the quoted string:
-
-```mermaid
-graph TB
-    KM["Organisational AI Memory
-refreshed every 5 minutes"]
-```
-
-The closing `"` must be on a separate line if the label spans multiple lines. Keep the label lines at the same indentation level as the rest of the diagram.
-
-## Graph Direction
-
-Use `graph TB` (top-bottom) or `graph LR` (left-right). Both render correctly in Obsidian. Avoid `graph TD` (identical to `TB` but less explicit).
-
-## Gantt Charts
-
-Always specify `dateFormat YYYY-MM`. Avoid special characters (`(`, `)`, `[`, `]`) in section labels — they can break parsing. Use plain prose for section names.
-
-```mermaid
-gantt
-    title Platform Rollout
-    dateFormat YYYY-MM
-    section Phase 0 — Validate
-    API integration    :a1, 2026-03, 4w
-```
-
-## Subgraph Labels
-
-Double-quote subgraph labels if they contain spaces:
+- **No `\n` or `<br/>` in node labels** — both render as literal text. Use a real newline inside the quoted string, closing `"` on its own line, label lines at the diagram's indentation.
+- **`graph TB` or `graph LR`** — avoid `graph TD` (identical to `TB`, less explicit).
+- **Gantt: always `dateFormat YYYY-MM`** — no `(`, `)`, `[`, `]` in section labels, they break parsing; use plain prose section names.
+- **Double-quote subgraph labels containing spaces** — unquoted spaces cause parse errors.
+- **Double-quote arrow labels containing spaces or special characters.**
+- **Short uppercase node IDs** (`SRC`, `IDX`, `API`) — IDs are not displayed, the quoted label is.
 
 ```mermaid
 graph TB
     subgraph SRC["Your data environment"]
-```
-
-Without quotes, spaces in subgraph labels cause parse errors.
-
-## Node ID Convention
-
-Keep node IDs short and uppercase (e.g., `KM`, `AG`, `SRC`). Node IDs are not displayed; labels (inside `"..."`) are.
-
-## Arrow Labels
-
-Wrap arrow labels in double quotes when they contain spaces or special characters:
-
-```
-SRC -->|"Secure read — data stays in region"| KM
+        DB["Source database"]
+    end
+    IDX["Search index
+refreshed every 5 minutes"]
+    DB -->|"Secure read — data stays in region"| IDX
 ```
