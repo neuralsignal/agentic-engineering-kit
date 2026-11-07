@@ -9,7 +9,7 @@
 #   - ORG_PROJECTS_TOKEN secret: fine-grained PAT with read:org + read:project scopes
 #
 # Note: GitHub's Projects v2 API is GraphQL-only. This workflow uses the gh CLI
-# GraphQL interface. Adjust the project number in CLAUDE.md or pass it as input.
+# GraphQL interface. Adjust the project number in AGENTS.md or pass it as input.
 
 name: Project Sync
 
@@ -19,7 +19,7 @@ on:
   workflow_dispatch:
     inputs:
       project_number:
-        description: "GitHub Projects v2 project number (overrides CLAUDE.md default)"
+        description: "GitHub Projects v2 project number (overrides AGENTS.md default)"
         required: false
 
 permissions:
@@ -42,14 +42,14 @@ jobs:
       - name: Determine project number
         id: project
         run: |
-          # Try input first, then CLAUDE.md, then fail loudly
+          # Try input first, then AGENTS.md, then fail loudly
           if [ -n "${{ github.event.inputs.project_number }}" ]; then
             echo "number=${{ github.event.inputs.project_number }}" >> $GITHUB_OUTPUT
           else
-            # Extract from CLAUDE.md: line like "Project board: <number>"
-            num=$(grep -oP '(?<=Project board: )\d+' CLAUDE.md || true)
+            # Extract from AGENTS.md: line like "Project board: <number>"
+            num=$(grep -oP '(?<=Project board: )\d+' AGENTS.md || true)
             if [ -z "$num" ]; then
-              echo "ERROR: No project number found. Set 'Project board: <number>' in CLAUDE.md or pass project_number input."
+              echo "ERROR: No project number found. Set 'Project board: <number>' in AGENTS.md or pass project_number input."
               exit 1
             fi
             echo "number=$num" >> $GITHUB_OUTPUT

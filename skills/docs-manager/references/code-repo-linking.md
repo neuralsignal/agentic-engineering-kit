@@ -11,7 +11,7 @@ docs repo with suggested documentation updates.
 
 ## Setup: Docs Repo
 
-Add a `## Code Repositories` section to `CLAUDE.md` in the docs repo:
+Add a `## Code Repositories` section to `AGENTS.md` in the docs repo:
 
 ```markdown
 ## Code Repositories
@@ -32,7 +32,7 @@ Create a fine-grained PAT:
 
 ## Setup: Each Code Repo
 
-In each code repo's `CLAUDE.md`, add:
+In each code repo's `AGENTS.md`, add:
 
 ```markdown
 ## Docs Repository
@@ -86,5 +86,5 @@ Merge or close the open PR before the next sync run.
 
 ## Disabling Sync for a Repo
 
-Remove the repo from the `## Code Repositories` table in `CLAUDE.md`.
+Remove the repo from the `## Code Repositories` table in `AGENTS.md`.
 The workflow reads this table on each run.

@@ -26,7 +26,7 @@ jobs:
           claude_args: "--model claude-sonnet-4-6 --max-turns 12 --allowedTools Bash,Read,Write,Glob,Grep"
           prompt: |
             You are a documentation compliance checker.
-            Read CLAUDE.md for project-specific documentation standards.
+            Read AGENTS.md for project-specific documentation standards.
 
             Review the changes in this PR for documentation compliance.
 

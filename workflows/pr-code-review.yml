@@ -27,14 +27,14 @@ jobs:
                       --max-turns 100
                       --allowedTools Read,Glob,Grep,Bash
                   prompt: |
-                      Review the changes in this pull request. Read CLAUDE.md for project standards.
+                      Review the changes in this pull request. Read AGENTS.md for project standards.
 
                       Steps:
                       1. Run `git diff origin/main...HEAD` to see the changes.
                       2. Read changed files for context as needed.
                       3. Write a concise review to /tmp/review.md covering:
                          - Correctness of the implementation
-                         - Compliance with project standards from CLAUDE.md
+                         - Compliance with project standards from AGENTS.md
                          - Test coverage for new code paths
                          - Any security or reliability concerns
 

@@ -374,7 +374,7 @@ components:
     name: Issue Auto-Triage
     description: >
       Automatically classifies and labels newly opened issues. Applies
-      type, priority, and status labels based on CLAUDE.md taxonomy.
+      type, priority, and status labels based on AGENTS.md taxonomy.
     category: ci-cd
     platforms: [github-actions]
     dependencies: [github-actions-claude]

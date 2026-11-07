@@ -1,6 +1,7 @@
-# CLAUDE-factory.md -- Dark Factory Template
+# AGENTS-factory.md -- Dark Factory Template
 
-Copy the sections below into your project's `CLAUDE.md` to enable the dark factory workflows.
+Copy the sections below into your project's `AGENTS.md` to enable the dark factory workflows.
+`AGENTS.md` is the canonical instruction file; `CLAUDE.md` is a symlink to it.
 Fill in the placeholders (`<...>`) with project-specific values.
 
 ---

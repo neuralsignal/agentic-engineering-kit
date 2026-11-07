@@ -7,7 +7,7 @@ Agents are autonomous, narrowly-scoped AI subagents that can be invoked by the p
 Subagents do **NOT** receive:
 
 - Auto-loaded rules from `rules/`
-- The main system prompt (CLAUDE.md, .cursorrules, etc.)
+- The main system prompt (AGENTS.md, .cursorrules, etc.)
 - Any parent conversation context beyond what is passed in the invocation prompt
 
 This means **all critical rules must be embedded directly in each agent's system prompt**. If an agent must follow engineering principles, copy them inline -- do not assume they will be loaded automatically.

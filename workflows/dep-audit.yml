@@ -25,10 +25,10 @@ jobs:
           claude_args: "--model claude-sonnet-4-6 --max-turns 30 --allowedTools Read,Glob,Grep,Bash"
           prompt: |
             You are a dependency audit agent.
-            Read CLAUDE.md for project-specific dependency tooling and standards.
+            Read AGENTS.md for project-specific dependency tooling and standards.
 
             Perform a comprehensive dependency audit:
-            1. Read CLAUDE.md to find the dependency audit command, lockfile path, and package manager.
+            1. Read AGENTS.md to find the dependency audit command, lockfile path, and package manager.
             2. Run the project's audit command (e.g., pip audit, npm audit).
             3. Check for outdated dependencies by reading lockfile/manifest.
             4. Check for version pin issues (unpinned deps, wide version ranges).

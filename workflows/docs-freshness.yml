@@ -27,10 +27,10 @@ jobs:
           claude_args: "--model claude-haiku-4-5-20251001 --max-turns 10 --allowedTools Read,Glob,Grep,Bash"
           prompt: |
             You are a documentation freshness checker.
-            Read CLAUDE.md for project-specific documentation standards.
+            Read AGENTS.md for project-specific documentation standards.
 
             Check documentation freshness:
-            1. Read CLAUDE.md to understand documentation standards.
+            1. Read AGENTS.md to understand documentation standards.
             2. Find all documentation files:
                - README.md, CHANGELOG.md, CONTRIBUTING.md, docs/**/*.md
             3. For each doc file, check last modification date:
@@ -39,7 +39,7 @@ jobs:
             5. Compare README.md against actual CLI/API:
                - Read README.md and check if documented commands/options match the source.
                - Look for documented features that no longer exist or new features not documented.
-            6. Check for missing docstrings on public functions (per CLAUDE.md standards).
+            6. Check for missing docstrings on public functions (per AGENTS.md standards).
 
             For each finding:
             a. Check for existing open issues:

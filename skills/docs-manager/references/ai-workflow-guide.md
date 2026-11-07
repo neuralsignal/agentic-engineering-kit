@@ -22,7 +22,7 @@ After running the setup procedure in `SKILL.md`, you have these Claude workflows
 **Trigger:** Every new issue opened.
 
 **What happens:**
-1. Claude reads `CLAUDE.md` for the label taxonomy and project list.
+1. Claude reads `AGENTS.md` for the label taxonomy and project list.
 2. Applies `type:*`, `priority:*`, and `status:triage` labels.
 3. Posts a triage comment explaining the classification and suggested next steps.
 
@@ -42,7 +42,7 @@ After running the setup procedure in `SKILL.md`, you have these Claude workflows
 ```
 @claude <free-form question>
 ```
-Claude answers using `CLAUDE.md`, `projects/`, `sops/`, and the full issue/PR context.
+Claude answers using `AGENTS.md`, `projects/`, `sops/`, and the full issue/PR context.
 
 ```
 @claude extract-actions
@@ -139,7 +139,7 @@ Useful for searching project state in Obsidian.
 **Trigger:** Weekly Monday 06:00 UTC, manual dispatch.
 
 **What it does:**
-1. For each registered code repo (listed in `CLAUDE.md` under `## Code Repositories`),
+1. For each registered code repo (listed in `AGENTS.md` under `## Code Repositories`),
    fetches the latest git activity (merged PRs, tags, commit summary).
 2. Compares against `projects/<name>/architecture.md` and status files.
 3. Creates a PR with suggested updates to architecture docs or a new status file
@@ -148,15 +148,15 @@ Useful for searching project state in Obsidian.
 **Requirements:**
 - `DOCS_WRITE_TOKEN` secret with `Contents: Read+Write` and `Pull requests: Read+Write`
   on this docs repo. Store it in the docs repo's secrets.
-- Each code repo must list the docs repo in `CLAUDE.md` under `## Docs Repository`.
+- Each code repo must list the docs repo in `AGENTS.md` under `## Docs Repository`.
 
 ---
 
-## Keeping CLAUDE.md Current
+## Keeping AGENTS.md Current
 
-The workflows rely on `CLAUDE.md` as their context file. Keep it updated:
+The workflows rely on `AGENTS.md` as their context file. Keep it updated:
 
 - **Add a project:** Add a row to the project index table and create the label.
 - **Add a code repo:** Add an entry under `## Code Repositories`.
 - **Change a label:** Update the taxonomy section; re-run triage on affected issues manually.
-- **Change a SOP:** Update `sops/` and note the change in CLAUDE.md if it affects agent behaviour.
+- **Change a SOP:** Update `sops/` and note the change in AGENTS.md if it affects agent behaviour.
