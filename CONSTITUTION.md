@@ -23,7 +23,7 @@ Every package or project carries these. They are named, not optional.
 |----------|----------|-------|
 | `INTENT.md` | package root | Agnostic goal, scope, non-goals, principles. The source of truth. Mirrors the production-gate status. |
 | `CONTRACTS.md` | package root | Data contracts, public interfaces, invariants. Language-agnostic. Freely overhaul-able unless production-gated. |
-| `CLAUDE.md` | package root | Repo-specific agent instructions. **Declares the production gate** (deployed AND in active use). |
+| `AGENTS.md` | package root | Repo-specific agent instructions — the canonical instruction file; `CLAUDE.md` is a symlink to it. **Declares the production gate** (deployed AND in active use). |
 | `docs/decisions/NNNN-kebab.md` | `docs/decisions/` | ADRs — one per architectural decision. Status · Context · Decision. |
 | `docs/<initiative>/PLAN.md` | per initiative | Language/SDK-specific design and plan. |
 | `docs/<initiative>/TASKS.md` | per initiative | Task and progress tracking (ID · owner · status · deps · gate). |
@@ -139,7 +139,7 @@ This section is the single home for how an agent runs a task — understanding, 
 - **Least privilege** — Use the minimum tools and permissions for the task. Read-only review stays read-only. Dangerous, irreversible, external, or user-facing actions require explicit approval.
 - **Stop on unexpected state** — Do not overwrite or revert unrelated user changes. If the repo state shifts unexpectedly, stop and ask. If verification reveals a deeper issue, report it before widening scope.
 - **No hallucinations** — Do not invent library versions, API methods, or factual claims from memory. Verify. When uncertain, say so.
-- **Instruction precedence** — Resolve conflicts in this order: Intent-First governing principle → direct user/task instruction → local project docs (`INTENT.md`, `CLAUDE.md`) → workspace rules → this constitution → external guidance.
+- **Instruction precedence** — Resolve conflicts in this order: Intent-First governing principle → direct user/task instruction → local project docs (`INTENT.md`, `AGENTS.md`) → workspace rules → this constitution → external guidance.
 
 ### Task Lifecycle
 
@@ -186,7 +186,7 @@ How agents report to the user:
 ## 11. Change Safety
 
 - **No backwards compatibility by default** — Refactor liberally to align with intent. Do not handle old cases, formats, or migration paths unless explicitly told to. Confirm at session start whether backwards compatibility is required (see Intent-First); never assume it.
-- **Production gate** — A package is *production-gated* only when its `CLAUDE.md` and `INTENT.md` declare it **deployed AND in active use** (deployed alone does not count). Until then, contracts and interfaces are freely overhaul-able. Once gated:
+- **Production gate** — A package is *production-gated* only when its `AGENTS.md` and `INTENT.md` declare it **deployed AND in active use** (deployed alone does not count). Until then, contracts and interfaces are freely overhaul-able. Once gated:
   - Schema/API/contract changes require a documented migration or backfill, rollout order, and an abort/rollback path before merge.
   - Any contract or schema change requires an ADR in `docs/decisions/` documenting consumer impact.
   - Any breaking change requires stop-and-ask: explicit human approval first.
@@ -227,7 +227,7 @@ Describe the impact and wait for confirmation before:
 - **Never commit:** secrets (`.env`), generated environments, runtime output, machine-specific config.
 - **Always commit:** lock files, source code, config templates.
 - **Branches:** `kebab-case-description`; delete after merge.
-- **Worktree awareness** — In a worktree, stay on the assigned branch. Do not push from worktrees. Do not run destructive git operations (reset, clean, gc) that touch the shared object store. (Full multi-agent protocol: §17.)
+- **Worktree awareness** — In a worktree, stay on the assigned branch. Push only that branch, or `main` in a repo that publishes to `main`. Do not run destructive git operations (reset, clean, gc) that touch the shared object store. (Full multi-agent protocol: §17.)
 
 ---
 
@@ -265,9 +265,9 @@ Describe the impact and wait for confirmation before:
 
 Applies when agents may work concurrently on one repository, or when a task benefits from isolation. Determine your working mode during planning. (Worktree commands and platform mechanics live in a workspace rule, not here.)
 
-- **Own branch, own worktree** — Each agent works on its own branch in its own worktree. Never modify another agent's worktree. Merges happen through the primary tree, controlled by the user.
+- **Own branch, own worktree** — Each agent works on its own branch in its own worktree. Unattended agents work only there. Never modify another agent's worktree or the user's working tree.
 - **Shared state is a race condition** — Files outside version control (databases, `.env`, lock files, caches, runtime state) may be shared across worktrees. Do not write to them unless the task explicitly requires it; if exclusive access is needed, say so and wait.
-- **Do not push from worktrees** — Commit to your branch; let the user push and merge. No destructive git operations on the shared object store.
+- **Publish from your worktree** — Push your branch and open a PR; the user merges it. A repo that publishes to `main` takes a rebase onto `origin/main` and a direct push instead. No destructive git operations on the shared object store.
 - **Worktrees must initialize cleanly** — If a worktree is missing dependencies, fix the init script; do not hand-patch the worktree.
 - **Explicit handoff** — When handing off, state: what changed, what did *not* change, what was verified and how, remaining risks, and the recommended next action.
 

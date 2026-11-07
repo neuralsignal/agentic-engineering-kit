@@ -75,10 +75,10 @@ jobs:
           claude_args: "--model claude-sonnet-4-6 --max-turns 20 --allowedTools Read,Write,Edit,Glob,Grep,Bash"
           prompt: |
             You are a documentation updater. Keep docs/ in sync with the codebase.
-            Read CLAUDE.md for project conventions.
+            Read AGENTS.md for project conventions.
 
             Steps:
-            1. Read CLAUDE.md and mkdocs.yml to understand the project and docs structure.
+            1. Read AGENTS.md and mkdocs.yml to understand the project and docs structure.
             2. Read all files in docs/ to understand current documentation.
             3. Read source code: module docstrings, function signatures, CLI commands, config classes.
             4. Compare docs against code. Look for:

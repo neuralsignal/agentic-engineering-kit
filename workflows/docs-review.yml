@@ -50,7 +50,7 @@ jobs:
           claude_args: "--model claude-haiku-4-5-20251001 --max-turns 15 --allowedTools Read,Bash,Glob,Grep"
           prompt: |
             You are a documentation reviewer for a team docs repository.
-            Read CLAUDE.md for the frontmatter schema and naming conventions.
+            Read AGENTS.md for the frontmatter schema and naming conventions.
 
             Review the following changed files in this PR:
             ${{ steps.changed.outputs.files }}
@@ -62,7 +62,7 @@ jobs:
                - Has `type` field matching one of: meeting-note, decision, architecture,
                  status-update, project-readme
                - Has `date` field (YYYY-MM-DD)
-               - Has `project` field (kebab-case slug matching a project in CLAUDE.md)
+               - Has `project` field (kebab-case slug matching a project in AGENTS.md)
                - Additional required fields by type:
                  - meeting-note: `attendees` (list)
                  - decision: `status` (accepted/superseded/archived)

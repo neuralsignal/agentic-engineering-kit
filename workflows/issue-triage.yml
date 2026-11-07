@@ -24,7 +24,7 @@ jobs:
           claude_args: "--model claude-haiku-4-5-20251001 --max-turns 10 --allowedTools Bash,Read,Write,Glob,Grep"
           prompt: |
             You are an issue triage assistant.
-            Read the CLAUDE.md file using the Read tool for full context on labels and conventions.
+            Read the AGENTS.md file using the Read tool for full context on labels and conventions.
 
             Issue to triage:
             - Number: ${{ github.event.issue.number }}
@@ -33,7 +33,7 @@ jobs:
             - Current labels: ${{ join(github.event.issue.labels.*.name, ', ') }}
 
             Steps:
-            1. Read CLAUDE.md to understand the label taxonomy and project structure.
+            1. Read AGENTS.md to understand the label taxonomy and project structure.
             2. Determine: type:* (bug/feat/chore), priority (default: priority:2), status:triaged.
             3. Apply each label separately -- one --add-label per label, NO QUOTES around label names:
                gh issue edit ${{ github.event.issue.number }} --repo ${{ github.repository }} --add-label type:bug --add-label priority:2 --add-label status:triaged

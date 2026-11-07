@@ -25,10 +25,10 @@ jobs:
           claude_args: "--model claude-opus-4-6 --max-turns 30 --allowedTools Read,Glob,Grep,Bash"
           prompt: |
             You are a security scanning agent.
-            Read CLAUDE.md for project-specific security standards.
+            Read AGENTS.md for project-specific security standards.
 
             Perform a security assessment of the codebase:
-            1. Read CLAUDE.md to understand the project structure and security standards.
+            1. Read AGENTS.md to understand the project structure and security standards.
             2. Scan for common security issues:
                - Hardcoded secrets, API keys, tokens, passwords in source files
                - SQL injection vulnerabilities (string concatenation in queries)

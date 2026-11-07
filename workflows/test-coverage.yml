@@ -25,15 +25,15 @@ jobs:
           claude_args: "--model claude-sonnet-4-6 --max-turns 25 --allowedTools Read,Glob,Grep,Bash"
           prompt: |
             You are a test coverage analysis agent.
-            Read CLAUDE.md for project-specific test and coverage configuration.
+            Read AGENTS.md for project-specific test and coverage configuration.
 
             Analyze test coverage:
-            1. Read CLAUDE.md to find the coverage command, threshold, and test framework.
+            1. Read AGENTS.md to find the coverage command, threshold, and test framework.
             2. Check the CI Setup section -- follow any setup steps needed before running tests
                (e.g., install dependencies, set up system packages).
             3. Run the project's coverage command.
             4. Analyze results:
-               - Files below the coverage threshold (from CLAUDE.md, default: 80%)
+               - Files below the coverage threshold (from AGENTS.md, default: 80%)
                - Critical code paths without any tests
                - Edge cases that should have tests (error handling, boundary conditions)
                - Whether property-based tests exist for pure functions (if the project uses hypothesis/fast-check)

@@ -110,7 +110,7 @@ jobs:
 
       # --- CI Setup (project-specific) ---
       # Add your project's CI setup steps here.
-      # See CLAUDE.md "CI Setup" section for the required steps.
+      # See AGENTS.md "CI Setup" section for the required steps.
       # Example for a pixi project:
       #
       # - name: Set up pixi
@@ -174,7 +174,7 @@ jobs:
           claude_args: "--model claude-opus-4-6 --max-turns 100 --allowedTools Read,Write,Edit,Glob,Grep,Bash"
           prompt: |
             You are fixing CI failures on a pull request.
-            Read CLAUDE.md for project conventions, build commands, and standards.
+            Read AGENTS.md for project conventions, build commands, and standards.
 
             This is auto-fix attempt ${{ steps.retry.outputs.attempt }} of 3.
 
@@ -188,10 +188,10 @@ jobs:
             ```
 
             Steps:
-            1. Read CLAUDE.md to understand the project's build/test/lint commands.
+            1. Read AGENTS.md to understand the project's build/test/lint commands.
             2. Analyze the CI failure logs above to identify what failed and why.
             3. Fix the issues in the code (lint errors, test failures, type errors, etc.).
-            4. Run the project's test command (from CLAUDE.md "Build & Test" section) to verify fixes.
+            4. Run the project's test command (from AGENTS.md "Build & Test" section) to verify fixes.
             5. Run lint/format commands if the failure was lint-related.
             6. Commit and push:
                git add -A && git commit -m "fix: auto-fix CI failures (attempt ${{ steps.retry.outputs.attempt }})"

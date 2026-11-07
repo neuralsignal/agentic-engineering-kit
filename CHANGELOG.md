@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+- `AGENTS.md` is the canonical instruction file; `CLAUDE.md` is a symlink to it. `CONSTITUTION.md`, `INTEGRATING.md`, the docs-manager skill and every workflow prompt now name `AGENTS.md`.
+- `templates/CLAUDE-factory.md` renamed to `templates/AGENTS-factory.md`.
+- `CONSTITUTION.md` §17: agents publish from their own worktree — push the branch and open a PR, or rebase and push to `main` in a repo that publishes there.
+
 ## [0.6.0] - 2026-06-08
 
 ### Added

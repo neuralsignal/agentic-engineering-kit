@@ -76,7 +76,7 @@ For each project:
 mkdir -p projects/<name>/decisions projects/<name>/meetings projects/<name>/status
 ```
 
-### 4. Create CLAUDE.md
+### 4. Create AGENTS.md
 
 Copy the template below and fill in your org/project values. This file is the single
 source of truth for label taxonomy, project index, and agentic rules.
@@ -195,7 +195,7 @@ Required fields by type:
 | Command | Where | What happens |
 |---|---|---|
 | `@claude extract-actions` | PR comment on a meeting note PR | Claude reads Action Items section, creates GitHub Issues |
-| `@claude <question>` | Any issue or PR comment | Claude answers using CLAUDE.md, projects/, sops/ |
+| `@claude <question>` | Any issue or PR comment | Claude answers using AGENTS.md, projects/, sops/ |
 | `@claude draft a status update for <project>` | Issue comment | Claude generates a status update draft |
 | `@claude summarise open issues for <project>` | Issue comment | Claude queries and summarises open issues |
 | `@claude review this doc` | PR comment | Claude reviews the changed doc for compliance |

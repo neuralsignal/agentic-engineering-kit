@@ -7,7 +7,7 @@ Steps to add a new project to the docs repo.
 - [ ] Create the project label
 - [ ] Create the folder structure
 - [ ] Create `projects/<name>/README.md`
-- [ ] Update `CLAUDE.md`
+- [ ] Update `AGENTS.md`
 - [ ] Create the GitHub Project board item (optional)
 
 ---
@@ -71,7 +71,7 @@ Search: [project:<name> is:open](https://github.com/<org>/docs/issues?q=label%3A
 
 ---
 
-## Step 4: Update CLAUDE.md
+## Step 4: Update AGENTS.md
 
 Add the project to the project index table:
 
@@ -104,7 +104,7 @@ Or create a dedicated board for the project if it warrants separate tracking.
 
 1. Update `projects/<name>/README.md`: set `status: archived` in frontmatter.
 2. Remove the label from new issue templates (but keep the label itself -- issues are permanent).
-3. Update the project row in `CLAUDE.md` to `status: archived`.
+3. Update the project row in `AGENTS.md` to `status: archived`.
 4. Close all open issues for the project (or move to a successor project).
 
 Do not delete the `projects/<name>/` folder. Meeting notes, decisions, and architecture

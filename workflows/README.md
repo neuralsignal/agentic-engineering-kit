@@ -130,9 +130,9 @@ cp workflows/pr-code-review.yml /path/to/project/.github/workflows/
 ./install.sh wf-claude-mention --target /path/to/project
 ```
 
-### 3. Set up CLAUDE.md
+### 3. Set up AGENTS.md
 
-Copy `templates/CLAUDE-factory.md` into your project's `CLAUDE.md` and fill in the project-specific sections (build commands, standards, etc.).
+Copy `templates/AGENTS-factory.md` into your project's `AGENTS.md` and fill in the project-specific sections (build commands, standards, etc.). `AGENTS.md` is the canonical file; make `CLAUDE.md` a symlink to it (`ln -s AGENTS.md CLAUDE.md`) so Claude Code loads the same text.
 
 ### 4. Add secrets
 
@@ -168,13 +168,13 @@ Use this checklist when deploying the dark factory to a new repository:
 - [ ] `FACTORY_PAT` secret added to repo (fine-grained PAT with actions/commit-statuses/issues/PRs read/write; classic PAT with `public_repo` scope if label ops fail on public repos)
 - [ ] Workflow permissions set to **Read and write** + **Allow GitHub Actions to create and approve pull requests**
 - [ ] `setup-factory.sh --repo owner/repo` run (creates labels + Factory Dashboard issue)
-- [ ] `CLAUDE.md` created from `templates/CLAUDE-factory.md` and customized
+- [ ] `AGENTS.md` created from `templates/AGENTS-factory.md` and customized
 - [ ] Workflow files copied to `.github/workflows/` (including `factory-orchestrator.yml`)
 - [ ] Smoke tests passed: mention, triage, implement, review, assessment, orchestrator
 
 ## Core Design Decisions
 
-1. **CLAUDE.md as the single customization surface** -- Every workflow prompt starts with "Read CLAUDE.md." Project-specific labels, commands, standards all live there.
+1. **AGENTS.md as the single customization surface** -- Every workflow prompt starts with "Read AGENTS.md." Project-specific labels, commands, standards all live there.
 2. **GitHub-native inter-agent communication** -- Assessment agents CREATE issues with `claude:implement` label; implementation agent watches for that label.
 3. **File-based output** -- All Claude output to `/tmp/*.md`, posted via `--body-file` (no shell escaping bugs).
 4. **No auto-merge** -- Agents create PRs, humans merge. This is the control point.
@@ -213,7 +213,7 @@ Use this checklist when deploying the dark factory to a new repository:
 
 ## Customization
 
-All customization happens in your project's `CLAUDE.md`. The workflows read CLAUDE.md at runtime for:
+All customization happens in your project's `AGENTS.md`. The workflows read AGENTS.md at runtime for:
 
 - **Label taxonomy** -- what labels to apply
 - **Build & Test commands** -- how to run tests, lint, format
@@ -222,7 +222,7 @@ All customization happens in your project's `CLAUDE.md`. The workflows read CLAU
 - **Documentation standards** -- what docs are required
 - **CI Setup** -- steps needed before running tests (e.g., pixi install, npm install)
 
-See `templates/CLAUDE-factory.md` for the full template.
+See `templates/AGENTS-factory.md` for the full template.
 
 ## Troubleshooting
 
@@ -247,8 +247,8 @@ The default `--max-turns` may be too low for projects with many dependencies or 
 **`setup-labels.sh` creates garbled labels**
 Older versions of the script used `:` as a delimiter, which conflicted with label names like `claude:implement`. Ensure you're using the latest version of `setup-labels.sh`, which uses `|` as the delimiter.
 
-**Claude can't find CLAUDE.md**
-`CLAUDE.md` must be at the repository root. Ensure the checkout step in each workflow succeeds (check for `actions/checkout` errors in the workflow logs).
+**Claude can't find AGENTS.md**
+`AGENTS.md` must be at the repository root. Ensure the checkout step in each workflow succeeds (check for `actions/checkout` errors in the workflow logs).
 
 ## Estimated Cost
 

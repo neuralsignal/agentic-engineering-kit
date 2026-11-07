@@ -25,12 +25,12 @@ jobs:
           claude_args: "--model claude-sonnet-4-6 --max-turns 20 --allowedTools Read,Glob,Grep,Bash"
           prompt: |
             You are a code quality assessment agent.
-            Read CLAUDE.md for project-specific quality standards.
+            Read AGENTS.md for project-specific quality standards.
 
             Perform a code quality assessment:
-            1. Read CLAUDE.md to understand the project structure and quality standards.
+            1. Read AGENTS.md to understand the project structure and quality standards.
             2. Check for code quality issues:
-               - Files exceeding maximum line count (default: 300 lines, check CLAUDE.md for override)
+               - Files exceeding maximum line count (default: 300 lines, check AGENTS.md for override)
                - Functions with high cyclomatic complexity (deeply nested logic, many branches)
                - Code duplication (similar logic repeated across files)
                - Dead code (unused imports, unreachable branches, commented-out code)

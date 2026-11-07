@@ -19,7 +19,7 @@ Where `{path}` comes from the `path` field in `catalog.yaml`. For version pinnin
 3. **Present components** — group by category, recommend based on project type (see heuristics below)
 4. **Download selected components** — place each file per `install_target` (see file placement below)
 5. **Set up platform symlinks** — if the user uses Cursor, Claude Code, or another platform (see symlink setup below)
-6. **Create or update CLAUDE.md** — add relevant sections from `templates/CLAUDE-factory.md` for dark factory workflows
+6. **Create or update AGENTS.md** — the canonical instruction file; `CLAUDE.md` is a symlink to it (`ln -s AGENTS.md CLAUDE.md`). Add relevant sections from `templates/AGENTS-factory.md` for dark factory workflows
 7. **Verify** — confirm files are in place and agent can discover them
 
 ## Component Selection Heuristics
@@ -142,6 +142,6 @@ After integration, verify:
 
 1. Rules are auto-loaded — the AI assistant should see files in `rules/` without manual inclusion
 2. Skills are discoverable — `skills/` contains SKILL.md files that the assistant can find
-3. CONSTITUTION.md is accessible — referenced from the project's CLAUDE.md or placed at root
+3. CONSTITUTION.md is accessible — referenced from the project's AGENTS.md or placed at root
 4. Workflows (if installed) — `.github/workflows/` contains the YAML files; repository secrets (`ANTHROPIC_API_KEY`, optionally `FACTORY_PAT`) are configured
-5. Labels (if using dark factory) — run `scripts/setup-labels.sh` or manually create labels per the taxonomy in `templates/CLAUDE-factory.md`
+5. Labels (if using dark factory) — run `scripts/setup-labels.sh` or manually create labels per the taxonomy in `templates/AGENTS-factory.md`

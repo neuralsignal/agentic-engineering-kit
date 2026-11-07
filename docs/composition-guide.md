@@ -12,7 +12,7 @@ Ask your AI coding assistant to integrate the kit for you. Paste this prompt:
 > https://raw.githubusercontent.com/neuralsignal/agentic-engineering-kit/main/INTEGRATING.md
 > then help me select and install components for this project.
 
-The assistant reads the catalog, assesses your project (language, CI, existing structure), recommends components, and installs them — including platform symlinks and CLAUDE.md setup.
+The assistant reads the catalog, assesses your project (language, CI, existing structure), recommends components, and installs them — including platform symlinks and AGENTS.md setup.
 
 See [INTEGRATING.md](../INTEGRATING.md) for the full protocol the assistant follows.
 
@@ -22,7 +22,7 @@ See [INTEGRATING.md](../INTEGRATING.md) for the full protocol the assistant foll
 |------|------|
 | Zero manual steps — the assistant does everything | Requires an AI coding assistant |
 | Context-aware component selection | Assistant may need guidance on edge cases |
-| Handles symlinks and CLAUDE.md automatically | |
+| Handles symlinks and AGENTS.md automatically | |
 
 ## Approach 1: Git Subtree (Recommended for Teams)
 
@@ -74,7 +74,7 @@ ln -s ../.agentic-kit/rules/planning-protocol.md rules/planning-protocol.md
 .agentic-kit/install.sh --all --target . --setup-platform cursor --setup-platform claude
 ```
 
-**Option C: Point your agent config** at the subtree directory directly. For example, in `CLAUDE.md`:
+**Option C: Point your agent config** at the subtree directory directly. For example, in `AGENTS.md`:
 
 ```markdown
 See `.agentic-kit/CONSTITUTION.md` for the engineering constitution.

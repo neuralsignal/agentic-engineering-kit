@@ -2,7 +2,7 @@
 #
 # Runs weekly Monday 06:00 UTC and on manual dispatch.
 #
-# For each code repo listed in CLAUDE.md under "## Code Repositories":
+# For each code repo listed in AGENTS.md under "## Code Repositories":
 #   1. Fetches merged PRs, new releases, and open issues labelled docs-needed
 #      from the past 7 days.
 #   2. Runs Claude to detect if architecture.md or status docs need updating.
@@ -61,16 +61,16 @@ jobs:
             echo "skip=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Parse registered repos from CLAUDE.md
+      - name: Parse registered repos from AGENTS.md
         if: steps.existing.outputs.skip != 'true'
         id: repos
         run: |
           if [ -n "${{ github.event.inputs.repo }}" ]; then
             echo "list=${{ github.event.inputs.repo }}" >> $GITHUB_OUTPUT
           else
-            # Extract repos from "## Code Repositories" table in CLAUDE.md
+            # Extract repos from "## Code Repositories" table in AGENTS.md
             # Expected format: | project-name | org/repo | projects/folder |
-            REPOS=$(awk '/^## Code Repositories/,/^## /' CLAUDE.md \
+            REPOS=$(awk '/^## Code Repositories/,/^## /' AGENTS.md \
               | grep '^\s*|' \
               | tail -n +3 \
               | awk -F'|' '{print $3}' \
@@ -146,13 +146,13 @@ jobs:
           claude_args: "--model claude-sonnet-4-6 --max-turns 25 --allowedTools Read,Write,Edit,Glob,Grep,Bash"
           prompt: |
             You are a documentation updater for a team docs repository.
-            Read CLAUDE.md for the project index and content conventions.
+            Read AGENTS.md for the project index and content conventions.
 
             Activity data for each registered code repository is in /tmp/code-activity/*.json.
             Each file contains: merged_prs, releases, and docs_needed issues from the past 7 days.
 
             Steps:
-            1. Read CLAUDE.md to get the project index and the mapping of repos to folders.
+            1. Read AGENTS.md to get the project index and the mapping of repos to folders.
             2. Read /tmp/code-activity/ to see what happened in each repo.
             3. For each repo with activity:
                a. Read the current `projects/<name>/architecture.md` if it exists.
@@ -168,7 +168,7 @@ jobs:
                  --body "Requested in <code-repo-url>
                  <original issue body>" \
                  --label "type:task" --label "project:<name>"
-            5. For files you update: only modify files in projects/. Never touch sops/, sync/, or CLAUDE.md.
+            5. For files you update: only modify files in projects/. Never touch sops/, sync/, or AGENTS.md.
             6. If you made no file changes, exit without committing.
             7. If you made file changes:
                a. Stage: git add projects/
