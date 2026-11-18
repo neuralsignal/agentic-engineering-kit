@@ -1,4 +1,6 @@
-# Dark Factory -- Agentic Software Engineering via GitHub Actions
+# Legacy factory templates
+
+Use the [maintainer workflow guide](../docs/lean-factory.md) for current setups. This page records the older workflows for repositories that still run them or need rollback instructions.
 
 For new installations and migrations, use the [maintainer workflow guide](../docs/lean-factory.md). The rest of this document describes the older copied workflows.
 
