@@ -39,7 +39,9 @@ jobs:
             | sha256sum --check
           tar -xzf "$asset" actionlint
           cd "$GITHUB_WORKSPACE"
-          # GitHub exposes both job workflow identity fields. actionlint 1.7.12 predates them.
-          "$RUNNER_TEMP/actionlint" -ignore 'property "workflow_(repository|sha)" is not defined in object type'
-      - name: Test upstream sync with Git fixtures
-        run: node --test .github/scripts/upstream-sync.test.mjs
+          # actionlint 1.7.12 predates job workflow identity and concurrency queues.
+          "$RUNNER_TEMP/actionlint" \
+            -ignore 'property "workflow_(repository|sha)" is not defined in object type' \
+            -ignore 'unexpected key "queue" for "concurrency" section'
+      - name: Test reusable workflow gates
+        run: node --test .github/scripts/*.test.mjs

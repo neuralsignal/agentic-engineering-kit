@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- A reusable Dependabot workflow that checks CI, gets a tool-free Claude verdict, and merges approved revisions with a separate credential.
+
 ### Added
 - A reusable maintainer Claude workflow for Pixi repositories and a migration guide for existing factory consumers.
 - A reusable upstream sync workflow with Git conflict detection, Claude repairs, and a required GitHub Actions merge check.
