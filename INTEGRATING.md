@@ -17,7 +17,7 @@ Where `{path}` comes from the `path` field in `catalog.yaml`. For version pinnin
 1. **Fetch the catalog** — download `catalog.yaml` from this repo
 2. **Assess the target project** — language, CI platform, existing `rules/`/`skills/`/`agents/` dirs
 3. **Present components** — group by category, recommend based on project type (see heuristics below)
-4. **Install selected components** — copy standalone files per `install_target`. For `wf-maintainer-claude-pixi`, add the pinned caller from the [maintainer workflow guide](docs/lean-factory.md).
+4. **Install selected components** — copy standalone files per `install_target`. For `wf-maintainer-claude-pixi` and `wf-dependabot-review`, add the pinned caller from the [maintainer workflow guide](docs/lean-factory.md).
 5. **Set up platform symlinks** — if the user uses Cursor, Claude Code, or another platform (see symlink setup below)
 6. **Create or update AGENTS.md** — the canonical instruction file; `CLAUDE.md` is a symlink to it (`ln -s AGENTS.md CLAUDE.md`). Describe the project's actual build, test, and release commands.
 7. **Verify** — confirm files are in place and agent can discover them
@@ -52,6 +52,7 @@ Recommend components based on the project type. Start with the essentials and of
 |-----------|-----|
 | `github-actions-claude` | Patterns for Claude-powered GitHub Actions |
 | `wf-maintainer-claude-pixi` | Explicit Claude requests in Pixi projects |
+| `wf-dependabot-review` | CI-gated Claude review of Dependabot updates |
 
 Keep the project's CI, docs, and release jobs. Use the [maintainer workflow guide](docs/lean-factory.md) for a pinned caller, dependency updates, and a staged migration from the older templates.
 

@@ -356,6 +356,18 @@ components:
     dependencies: [github-actions-claude]
     install_target: .github/workflows
 
+  - id: wf-dependabot-review
+    type: workflow
+    path: .github/workflows/dependabot-review.yml
+    name: Dependabot review
+    description: >-
+      Reusable workflow for CI-gated dependency review and merge.
+      Install a pinned caller from docs/lean-factory.md.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
   - id: wf-maintainer-claude-pixi
     type: workflow
     path: .github/workflows/maintainer-claude-pixi.yml
