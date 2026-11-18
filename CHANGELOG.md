@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Added
+- A reusable maintainer Claude workflow for Pixi repositories and a migration guide for existing factory consumers.
+
 ### Changed
 - `AGENTS.md` is the canonical instruction file; `CLAUDE.md` is a symlink to it. `CONSTITUTION.md`, `INTEGRATING.md`, the docs-manager skill and every workflow prompt now name `AGENTS.md`.
 - `templates/CLAUDE-factory.md` renamed to `templates/AGENTS-factory.md`.

@@ -17,9 +17,9 @@ Where `{path}` comes from the `path` field in `catalog.yaml`. For version pinnin
 1. **Fetch the catalog** — download `catalog.yaml` from this repo
 2. **Assess the target project** — language, CI platform, existing `rules/`/`skills/`/`agents/` dirs
 3. **Present components** — group by category, recommend based on project type (see heuristics below)
-4. **Download selected components** — place each file per `install_target` (see file placement below)
+4. **Install selected components** — copy standalone files per `install_target`. For `wf-maintainer-claude-pixi`, add the pinned caller from the [maintainer workflow guide](docs/lean-factory.md).
 5. **Set up platform symlinks** — if the user uses Cursor, Claude Code, or another platform (see symlink setup below)
-6. **Create or update AGENTS.md** — the canonical instruction file; `CLAUDE.md` is a symlink to it (`ln -s AGENTS.md CLAUDE.md`). Add relevant sections from `templates/AGENTS-factory.md` for dark factory workflows
+6. **Create or update AGENTS.md** — the canonical instruction file; `CLAUDE.md` is a symlink to it (`ln -s AGENTS.md CLAUDE.md`). Describe the project's actual build, test, and release commands.
 7. **Verify** — confirm files are in place and agent can discover them
 
 ## Component Selection Heuristics
@@ -51,13 +51,9 @@ Recommend components based on the project type. Start with the essentials and of
 | Component | Why |
 |-----------|-----|
 | `github-actions-claude` | Patterns for Claude-powered GitHub Actions |
-| `wf-claude-mention` | Interactive @claude mentions on issues/PRs |
-| `wf-pr-code-review` | Automatic PR code review |
-| `wf-issue-triage` | Auto-classify and label issues |
-| `wf-issue-implement` | Implement labeled issues as PRs |
-| `wf-factory-orchestrator` | Sweep orphaned issues |
+| `wf-maintainer-claude-pixi` | Explicit Claude requests in Pixi projects |
 
-Offer weekly audit workflows (`wf-dep-audit`, `wf-security-scan`, `wf-code-quality`, `wf-test-coverage`) and monthly checks (`wf-docs-freshness`, `wf-workflow-upgrade`) as a second tier.
+Keep the project's CI, docs, and release jobs. Use the [maintainer workflow guide](docs/lean-factory.md) for a pinned caller, dependency updates, and a staged migration from the older templates.
 
 ### Documentation-heavy projects
 
@@ -143,5 +139,5 @@ After integration, verify:
 1. Rules are auto-loaded — the AI assistant should see files in `rules/` without manual inclusion
 2. Skills are discoverable — `skills/` contains SKILL.md files that the assistant can find
 3. CONSTITUTION.md is accessible — referenced from the project's AGENTS.md or placed at root
-4. Workflows (if installed) — `.github/workflows/` contains the YAML files; repository secrets (`ANTHROPIC_API_KEY`, optionally `FACTORY_PAT`) are configured
-5. Labels (if using dark factory) — run `scripts/setup-labels.sh` or manually create labels per the taxonomy in `templates/AGENTS-factory.md`
+4. Workflows (if installed) — `.github/workflows/` contains the caller and project CI. Verify the Claude credentials and run one maintainer request.
+5. Labels — set up the taxonomy only when retaining an older label-driven workflow.

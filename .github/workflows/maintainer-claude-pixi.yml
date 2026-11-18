@@ -1,0 +1,75 @@
+name: Maintainer Claude for Pixi
+
+on:
+  workflow_call:
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN:
+        required: true
+      CLAUDE_GITHUB_TOKEN:
+        description: Repository-scoped GitHub credential for a custom app or the existing pilot
+        required: false
+
+permissions: {}
+
+jobs:
+  check-request:
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.comment.user.type == 'User' &&
+      (github.event.comment.author_association == 'OWNER' ||
+       github.event.comment.author_association == 'MEMBER' ||
+       github.event.comment.author_association == 'COLLABORATOR') &&
+      (github.event.comment.body == '@claude' || startsWith(github.event.comment.body, '@claude '))
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      allowed: ${{ steps.check.outputs.allowed }}
+    steps:
+      - name: Verify the PR belongs to this repository
+        id: check
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.pull_request && github.event.issue.number || '' }}
+        run: |
+          allowed=true
+          if [[ -n "$PR_NUMBER" ]]; then
+            allowed=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" \
+              --jq '.head.repo.id != null and .head.repo.id == .base.repo.id')
+          fi
+          if [[ "$allowed" != true ]]; then
+            echo "Claude requests on fork PRs are skipped." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "allowed=$allowed" >> "$GITHUB_OUTPUT"
+
+  claude:
+    needs: check-request
+    if: needs.check-request.outputs.allowed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: maintainer-claude-${{ github.repository }}-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
+        with:
+          locked: true
+      - uses: anthropics/claude-code-action@e5812cd75691ca7bbfc57c0ecf4441db3a1ab7dd # v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.CLAUDE_GITHUB_TOKEN }}
+          claude_args: |
+            --model sonnet
+            --max-turns 30
+            --permission-mode acceptEdits
+            --allowedTools "Bash(pixi run lint),Bash(pixi run format-check),Bash(pixi run test-cov),Bash(gh pr create --draft:*)"
+            --append-system-prompt "Follow AGENTS.md. Answer review questions without editing. For an explicit implementation request, keep changes focused and use one draft PR. Reuse an existing PR for the branch. Leave GitHub Actions workflows and release configuration for human edits. Never merge or publish a release."
