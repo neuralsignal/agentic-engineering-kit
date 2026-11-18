@@ -13,6 +13,7 @@ const base = { sha: BASE, ref: 'main', repo: repository };
 const head = { sha: HEAD, ref: BRANCH, repo: repository };
 const pull = {
   number: 166, base, head, user: bot, state: 'open', draft: false, changed_files: 1,
+  created_at: '2026-01-01T00:00:00Z',
   title: 'Update checkout', body: '<details>Release notes for checkout</details>',
 };
 const file = {
@@ -22,6 +23,7 @@ const file = {
 const run = {
   id: 100, workflow_id: 10, path: WORKFLOW_FILE, run_attempt: 1, event: 'pull_request',
   conclusion: 'success', actor: bot, head_repository: repository, head_sha: HEAD, head_branch: BRANCH,
+  created_at: '2026-01-01T01:00:00Z',
   pull_requests: [pull],
 };
 const jobs = [
@@ -38,6 +40,7 @@ function fixture(overrides) {
     'actions/runs/100': { ...run, pull_requests: [] },
     'actions/workflows/ci.yml': { id: 10 },
     'pulls/166': pull,
+    'pulls?state=open&head=example%3Adependabot%2Fgithub_actions%2Factions%2Fcheckout-7&base=main&per_page=2': [pull],
     'actions/runs/100/attempts/1/jobs?per_page=100': { total_count: jobs.length, jobs },
     [`actions/workflows/10/runs?event=pull_request&head_sha=${HEAD}&per_page=1`]: { workflow_runs: [run] },
     'git/ref/heads/main': { object: { sha: BASE } },
@@ -65,7 +68,7 @@ test('requires same-repository bot identity, matching workflow and complete succ
   const checks = [
     { 'actions/runs/100': { ...run, workflow_id: 11 } },
     { 'actions/runs/100': { ...run, head_repository: { id: 43 } } },
-    { [`actions/workflows/10/runs?event=pull_request&head_sha=${HEAD}&per_page=1`]: { workflow_runs: [{ ...run, pull_requests: [] }] } },
+    { [`actions/workflows/10/runs?event=pull_request&head_sha=${HEAD}&per_page=1`]: { workflow_runs: [{ ...run, pull_requests: [pull, pull] }] } },
     { 'actions/runs/100': { ...run, event: 'push' } },
     { 'pulls/166': { ...pull, user: { ...bot, id: 7 } } },
     { 'pulls/166': { ...pull, head: { ...head, sha: NEXT } } },
@@ -76,6 +79,14 @@ test('requires same-repository bot identity, matching workflow and complete succ
     { [`compare/${BASE}...${HEAD}`]: { ...comparison, commits: [{ ...comparison.commits[0], author: { id: 9 } }] } },
   ];
   for (const overrides of checks) await assert.rejects(fixture(overrides), { name: 'Error' });
+});
+
+test('recovers an omitted run association only for a unique PR at the exact tested head', async () => {
+  const route = 'pulls?state=open&head=example%3Adependabot%2Fgithub_actions%2Factions%2Fcheckout-7&base=main&per_page=2';
+  const noAssociation = { [`actions/workflows/10/runs?event=pull_request&head_sha=${HEAD}&per_page=1`]: { workflow_runs: [{ ...run, pull_requests: [] }] } };
+  assert.equal((await fixture(noAssociation)).number, 166);
+  await assert.rejects(fixture({ ...noAssociation, [route]: [pull, pull] }));
+  await assert.rejects(fixture({ ...noAssociation, 'pulls/166': { ...pull, created_at: '2026-01-02T01:00:00Z' } }));
 });
 
 test('rejects moved or substituted action invocations, extra changes, and incomplete patches', () => {

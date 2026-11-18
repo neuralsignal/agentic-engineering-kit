@@ -108,22 +108,39 @@ export async function candidate(api, { repo, repoId, branch, workflow, required,
   // GitHub can omit PR associations on the single-run endpoint even for same-repo PRs.
   const runs = await api(`actions/workflows/${source.id}/runs?event=pull_request&head_sha=${head}&per_page=1`);
   const latest = runs.workflow_runs?.[0];
-  const linked = latest?.pull_requests?.[0];
-  requireEligible(latest?.id === runId && latest.run_attempt === attempt &&
-    latest.pull_requests?.length === 1 && Number.isSafeInteger(linked?.number) && linked.number > 0,
-  'The completed run is not the latest CI attempt linked to exactly one pull request.');
-  const number = linked.number;
+  requireEligible(latest?.id === runId && latest.run_attempt === attempt && latest.pull_requests?.length <= 1,
+    'The completed run is superseded or linked to multiple pull requests.');
+  const linked = latest.pull_requests[0];
+  let number = linked?.number;
+  if (!linked) {
+    // The list endpoint can omit the association too. Resolve by the exact repository-owned head.
+    requireEligible(/^dependabot\/(github_actions|npm_and_yarn)\//.test(run.head_branch),
+      'The completed run has no eligible Dependabot branch.');
+    const query = new URLSearchParams({ state: 'open', head: `${repo.split('/')[0]}:${run.head_branch}`, base: branch, per_page: '2' });
+    const pulls = await api(`pulls?${query}`);
+    requireEligible(pulls.length === 1 && pulls[0].head?.sha === head,
+      'The completed run does not match a unique open pull request.');
+    number = pulls[0].number;
+  }
+  requireEligible(Number.isSafeInteger(number) && number > 0, 'The completed run does not identify an eligible pull request.');
   const [pull, jobs, liveBase] = await Promise.all([
     api(`pulls/${number}`),
     api(`actions/runs/${runId}/attempts/${attempt}/jobs?per_page=100`),
     api(`git/ref/heads/${branch}`),
   ]);
-  const base = linked.base?.sha;
+  const base = linked ? linked.base?.sha : pull.base?.sha;
+  if (linked) {
+    requireEligible(linked.head?.ref === run.head_branch && linked.base?.ref === branch &&
+      linked.head?.repo?.id === repoId && linked.base?.repo?.id === repoId && linked.head?.sha === head,
+    'The linked pull request changed after CI.');
+  } else {
+    requireEligible(Date.parse(pull.created_at) <= Date.parse(run.created_at),
+      'The pull request was opened after the CI attempt began.');
+  }
   requireEligible(pull.state === 'open' && pull.draft === false && pull.user?.id === BOT_ID &&
     pull.user?.type === 'Bot' && pull.user?.login === BOT && pull.head?.repo?.id === repoId &&
     pull.base?.repo?.id === repoId && pull.head?.sha === head && pull.head?.ref === run.head_branch &&
-    pull.head?.ref === linked.head?.ref && pull.base?.ref === branch && linked.base?.ref === branch &&
-    linked.head?.repo?.id === repoId && linked.base?.repo?.id === repoId && linked.head?.sha === head &&
+    pull.base?.ref === branch &&
     SHA.test(base) && SHA.test(liveBase.object?.sha), 'The Dependabot pull request changed after CI.');
   requireEligible(jobs.total_count === jobs.jobs?.length && successfulJobs(jobs.jobs, required),
   'The latest CI attempt must contain every required job with a successful conclusion.');
