@@ -4,6 +4,7 @@
 
 ### Added
 - A reusable maintainer Claude workflow for Pixi repositories and a migration guide for existing factory consumers.
+- A reusable upstream sync workflow with Git conflict detection, Claude repairs, and a required GitHub Actions merge check.
 
 ### Changed
 - `AGENTS.md` is the canonical instruction file; `CLAUDE.md` is a symlink to it. `CONSTITUTION.md`, `INTEGRATING.md`, the docs-manager skill and every workflow prompt now name `AGENTS.md`.

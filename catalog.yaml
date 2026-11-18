@@ -344,6 +344,18 @@ components:
 
   # --- Workflows (Dark Factory) ---
 
+  - id: wf-upstream-sync
+    type: workflow
+    path: .github/workflows/upstream-sync.yml
+    name: Upstream sync
+    description: >-
+      Reusable workflow for CI-gated upstream merges with bounded Claude conflict repair.
+      Install a pinned caller using workflows/upstream-sync.md.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
   - id: wf-maintainer-claude-pixi
     type: workflow
     path: .github/workflows/maintainer-claude-pixi.yml
