@@ -23,6 +23,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
       - name: Lint workflows
         shell: bash
         run: |
@@ -35,4 +39,7 @@ jobs:
             | sha256sum --check
           tar -xzf "$asset" actionlint
           cd "$GITHUB_WORKSPACE"
-          "$RUNNER_TEMP/actionlint"
+          # GitHub exposes both job workflow identity fields. actionlint 1.7.12 predates them.
+          "$RUNNER_TEMP/actionlint" -ignore 'property "workflow_(repository|sha)" is not defined in object type'
+      - name: Test upstream sync with Git fixtures
+        run: node --test .github/scripts/upstream-sync.test.mjs
