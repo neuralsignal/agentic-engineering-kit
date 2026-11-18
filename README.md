@@ -20,7 +20,7 @@ Components are defined in [catalog.yaml](catalog.yaml) — the machine-readable 
 
 - **Constitution & Rules** — Engineering principles, planning protocols, git conventions, data/ML standards, and more. Rules are auto-loaded by AI assistants from the `rules/` directory.
 - **Skills** — On-demand workflows with scripts: GitHub Actions patterns, skill creation and benchmarking. Skills follow the [Agent Skills specification](https://agentskills.io/specification).
-- **Dark Factory Workflows** — GitHub Actions that use Claude to autonomously triage issues, review PRs, implement features, audit dependencies, scan for vulnerabilities, and more. See [workflows/README.md](workflows/README.md).
+- **Maintainer-requested Claude changes** — Add one pinned GitHub Actions caller alongside the repository’s CI and releases. See [the factory setup guide](docs/lean-factory.md).
 
 Browse all components: [`catalog.yaml`](catalog.yaml)
 
