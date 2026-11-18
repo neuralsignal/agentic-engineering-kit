@@ -1,5 +1,7 @@
 # Dark Factory -- Agentic Software Engineering via GitHub Actions
 
+For new installations and migrations, use the [maintainer workflow guide](../docs/lean-factory.md). The rest of this document describes the older copied workflows.
+
 A fully autonomous "dark factory" for software engineering using GitHub Actions + `anthropics/claude-code-action@v1`. The human's role is reduced to **reviewing and merging PRs** -- everything else is automated.
 
 ## The Autonomous Loop

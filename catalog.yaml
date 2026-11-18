@@ -344,6 +344,18 @@ components:
 
   # --- Workflows (Dark Factory) ---
 
+  - id: wf-maintainer-claude-pixi
+    type: workflow
+    path: .github/workflows/maintainer-claude-pixi.yml
+    name: Maintainer Claude for Pixi
+    description: >-
+      Reusable workflow for explicit maintainer requests on issues and same-repository PRs.
+      Install a pinned caller from docs/lean-factory.md.
+    category: ci-cd
+    platforms: [github-actions]
+    dependencies: [github-actions-claude]
+    install_target: .github/workflows
+
   - id: wf-claude-mention
     type: workflow
     path: workflows/claude-mention.yml
